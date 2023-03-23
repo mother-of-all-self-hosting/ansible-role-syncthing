@@ -1,0 +1,63 @@
+#jinja2: lstrip_blocks: "True"
+[Unit]
+Description=Syncthing ({{ syncthing_identifier }})
+{% for service in syncthing_systemd_required_services_list %}
+Requires={{ service }}
+After={{ service }}
+{% endfor %}
+DefaultDependencies=no
+
+[Service]
+Type=simple
+Environment="HOME={{ devture_systemd_docker_base_systemd_unit_home_path }}"
+ExecStartPre=-{{ devture_systemd_docker_base_host_command_sh }} -c '{{ devture_systemd_docker_base_host_command_docker }} kill {{ syncthing_identifier }} 2>/dev/null || true'
+ExecStartPre=-{{ devture_systemd_docker_base_host_command_sh }} -c '{{ devture_systemd_docker_base_host_command_docker }} rm {{ syncthing_identifier }} 2>/dev/null || true'
+
+ExecStartPre={{ devture_systemd_docker_base_host_command_docker }} create \
+			--rm \
+			--name={{ syncthing_identifier }} \
+			--log-driver=none \
+			--user={{ syncthing_uid }}:{{ syncthing_gid }} \
+			--cap-drop=ALL \
+			--cap-add=CHOWN \
+			--cap-add=FOWNER \
+			--read-only \
+			--network={{ syncthing_container_network }} \
+			--hostname={{ syncthing_container_hostname }} \
+			{% if syncthing_container_sync_tcp_bind_port %}
+			-p {{ syncthing_container_sync_tcp_bind_port }}:22000/tcp \
+			{% endif %}
+			{% if syncthing_container_sync_udp_bind_port %}
+			-p {{ syncthing_container_sync_udp_bind_port }}:22000/udp \
+			{% endif %}
+			{% if syncthing_container_local_discovery_udp_bind_port %}
+			-p {{ syncthing_container_local_discovery_udp_bind_port }}:21027/udp \
+			{% endif %}
+			--env-file={{ syncthing_base_path }}/env \
+			--label-file={{ syncthing_base_path }}/labels \
+			--health-interval={{ syncthing_container_health_interval }} \
+			--mount type=bind,src={{ syncthing_config_path }},dst=/var/syncthing \
+			--mount type=bind,src={{ syncthing_data_path }},dst=/data \
+			{% for volume in syncthing_container_additional_volumes %}
+			--mount type={{ volume.type | default('bind' if '/' in volume.src else 'volume') }},src={{ volume.src }},dst={{ volume.dst }}{{ (',' + volume.options) if volume.options else '' }} \
+			{% endfor %}
+			{% for arg in syncthing_container_extra_arguments %}
+			{{ arg }} \
+			{% endfor %}
+			{{ syncthing_container_image }}
+
+{% for network in syncthing_container_additional_networks %}
+ExecStartPre={{ devture_systemd_docker_base_host_command_docker }} network connect {{ network }} {{ syncthing_identifier }}
+{% endfor %}
+
+ExecStart={{ devture_systemd_docker_base_host_command_docker }} start --attach {{ syncthing_identifier }}
+
+ExecStop=-{{ devture_systemd_docker_base_host_command_sh }} -c '{{ devture_systemd_docker_base_host_command_docker }} kill {{ syncthing_identifier }} 2>/dev/null || true'
+ExecStop=-{{ devture_systemd_docker_base_host_command_sh }} -c '{{ devture_systemd_docker_base_host_command_docker }} rm {{ syncthing_identifier }} 2>/dev/null || true'
+
+Restart=always
+RestartSec=30
+SyslogIdentifier={{ syncthing_identifier }}
+
+[Install]
+WantedBy=multi-user.target

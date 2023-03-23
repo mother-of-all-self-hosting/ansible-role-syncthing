@@ -1,0 +1,25 @@
+---
+
+- name: Check existence of Syncthing systemd service
+  ansible.builtin.stat:
+    path: "{{ devture_systemd_docker_base_systemd_path }}/{{ syncthing_identifier }}.service"
+  register: syncthing_service_stat
+
+- when: syncthing_service_stat.stat.exists | bool
+  block:
+    - name: Ensure Syncthing systemd service is stopped
+      ansible.builtin.service:
+        name: "{{ syncthing_identifier }}"
+        state: stopped
+        enabled: false
+        daemon_reload: true
+
+    - name: Ensure Syncthing systemd service does not exist
+      ansible.builtin.file:
+        path: "{{ devture_systemd_docker_base_systemd_path }}/{{ syncthing_identifier }}.service"
+        state: absent
+
+    - name: Ensure Syncthing path doesn't exist
+      ansible.builtin.file:
+        path: "{{ syncthing_base_path }}"
+        state: absent

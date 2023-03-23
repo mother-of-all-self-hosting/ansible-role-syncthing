@@ -1,0 +1,60 @@
+---
+
+- name: Ensure Syncthing paths exist
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    mode: 0750
+    owner: "{{ syncthing_uid }}"
+    group: "{{ syncthing_gid }}"
+  with_items:
+    - "{{ syncthing_base_path }}"
+    - "{{ syncthing_config_path }}"
+    - "{{ syncthing_data_path }}"
+
+- when: syncthing_basicauth_enabled | bool
+  block:
+    - name: Ensure local temporary basic auth file does not exist to start with
+      ansible.builtin.file:
+        path: "{{ syncthing_basicauth_file_tmp }}"
+        state: absent
+      become: false
+      delegate_to: 127.0.0.1
+
+    - name: Convert syncthing credentials to htpasswd entries
+      ansible.builtin.include_tasks: "{{ role_path }}/tasks/includes/convert_credentials_to_htpasswd.yml"
+      with_items: "{{ syncthing_basicauth_credentials | unique }}"
+      loop_control:
+        loop_var: credential_entry
+
+- name: Ensure Syncthing support files installed
+  ansible.builtin.template:
+    src: "{{ role_path }}/templates/{{ item }}.j2"
+    dest: "{{ syncthing_base_path }}/{{ item }}"
+    mode: 0640
+    owner: "{{ syncthing_uid }}"
+    group: "{{ syncthing_gid }}"
+  with_items:
+    - env
+    - labels
+
+- name: Ensure Syncthing container image is pulled
+  community.docker.docker_image:
+    name: "{{ syncthing_container_image }}"
+    source: "{{ 'pull' if ansible_version.major > 2 or ansible_version.minor > 7 else omit }}"
+    force_source: "{{ syncthing_container_image_force_pull if ansible_version.major > 2 or ansible_version.minor >= 8 else omit }}"
+    force: "{{ omit if ansible_version.major > 2 or ansible_version.minor >= 8 else syncthing_container_image_force_pull }}"
+  register: result
+  retries: "{{ devture_playbook_help_container_retries_count }}"
+  delay: "{{ devture_playbook_help_container_retries_delay }}"
+  until: result is not failed
+
+- name: Ensure Syncthing container network is created
+  community.general.docker_network:
+    name: "{{ syncthing_container_network }}"
+    driver: bridge
+
+- name: Ensure Syncthing systemd service is present
+  ansible.builtin.template:
+    src: "{{ role_path }}/templates/systemd/syncthing.service.j2"
+    dest: "{{ devture_systemd_docker_base_systemd_path }}/{{ syncthing_identifier }}.service"
