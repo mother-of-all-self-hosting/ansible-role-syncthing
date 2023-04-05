@@ -11,10 +11,10 @@ syncthing_gid: ''
 
 syncthing_version: 1.23.3
 
-# The hostname at which syncthing is served.
+# The hostname at which Syncthing is served.
 syncthing_hostname: ''
 
-# The path at which syncthing is served.
+# The path at which Syncthing is served.
 # This value must either be `/` or not end with a slash (e.g. `/syncthing`).
 syncthing_path_prefix: /
 
@@ -54,7 +54,9 @@ syncthing_container_network: "{{ syncthing_identifier }}"
 # A list of additional container networks that the container would be connected to.
 # The role does not create these networks, so make sure they already exist.
 # Use this to expose this container to another reverse proxy, which runs in a different container network.
-syncthing_container_additional_networks: []
+syncthing_container_additional_networks: "{{ syncthing_container_additional_networks_auto + syncthing_container_additional_networks_custom }}"
+syncthing_container_additional_networks_auto: []
+syncthing_container_additional_networks_custom: []
 
 # Specifies how the container publishes its TCP sync port
 #
@@ -202,4 +204,7 @@ syncthing_floc_optout_enabled: true
 syncthing_hsts_preload_enabled: false
 
 # List of systemd services that syncthing.service depends on
-syncthing_systemd_required_services_list: ['docker.service']
+syncthing_systemd_required_services_list: "{{ syncthing_systemd_required_services_list_default + syncthing_systemd_required_services_list_auto + syncthing_systemd_required_services_list_custom }}"
+syncthing_systemd_required_services_list_default: ['docker.service']
+syncthing_systemd_required_services_list_auto: []
+syncthing_systemd_required_services_list_custom: []
