@@ -8,8 +8,8 @@ traefik.docker.network={{ syncthing_container_labels_traefik_docker_network }}
 {% set middlewares = [] %}
 
 {% if syncthing_container_labels_traefik_path_prefix != '/' %}
-traefik.http.middlewares.{{ syncthing_identifier }}-slashless-redirect.redirectregex.regex=^({{ syncthing_container_labels_traefik_path_prefix | quote }})$
-traefik.http.middlewares.{{ syncthing_identifier }}-slashless-redirect.redirectregex.replacement=${1}/
+traefik.http.middlewares.{{ syncthing_identifier }}-slashless-redirect.redirectregex.regex=https?://([^/]+)({{ syncthing_container_labels_traefik_path_prefix | quote }})$
+traefik.http.middlewares.{{ syncthing_identifier }}-slashless-redirect.redirectregex.replacement=${2}/
 {% set middlewares = middlewares + [syncthing_identifier + '-slashless-redirect'] %}
 {% endif %}
 
