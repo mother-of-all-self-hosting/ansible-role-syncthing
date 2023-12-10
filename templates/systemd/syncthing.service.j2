@@ -25,10 +25,10 @@ ExecStartPre={{ devture_systemd_docker_base_host_command_docker }} create \
 			--network={{ syncthing_container_network }} \
 			--hostname={{ syncthing_container_hostname }} \
 			{% if syncthing_container_sync_tcp_bind_port %}
-			-p {{ syncthing_container_sync_tcp_bind_port }}:22000/tcp \
+			-p {{ syncthing_container_sync_tcp_bind_port }}:{{ syncthing_container_sync_tcp_port }}/tcp \
 			{% endif %}
 			{% if syncthing_container_sync_udp_bind_port %}
-			-p {{ syncthing_container_sync_udp_bind_port }}:22000/udp \
+			-p {{ syncthing_container_sync_udp_bind_port }}:{{ syncthing_container_sync_udp_port }}/udp \
 			{% endif %}
 			{% if syncthing_container_local_discovery_udp_bind_port %}
 			-p {{ syncthing_container_local_discovery_udp_bind_port }}:21027/udp \
