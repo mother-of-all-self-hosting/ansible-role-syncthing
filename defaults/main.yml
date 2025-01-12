@@ -9,7 +9,7 @@ syncthing_identifier: syncthing
 syncthing_uid: ''
 syncthing_gid: ''
 
-syncthing_version: 1.29.1
+syncthing_version: 1.29.2
 
 # The hostname at which Syncthing is served.
 syncthing_hostname: ''
