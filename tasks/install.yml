@@ -73,7 +73,7 @@
     cmd: >-
       {{ devture_systemd_docker_base_host_command_docker }} network create
       {% if devture_systemd_docker_base_ipv6_enabled %}--ipv6{% endif %}
-      {{ syncthing_container_network_opts_string }}
+      {{ devture_systemd_docker_base_container_networks_driver_options_string }}
       {{ syncthing_container_network }}
   register: network_creation_result
   changed_when: network_creation_result.rc == 0
