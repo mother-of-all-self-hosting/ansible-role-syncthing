@@ -139,7 +139,10 @@ syncthing_container_labels_additional_labels: ''
 # For non-Traefik setups, we use the default healthcheck interval (60s) to decrease overhead.
 syncthing_container_health_interval: "{{ '5s' if syncthing_container_labels_traefik_enabled else '60s' }}"
 
-syncthing_container_hostname: "{{ syncthing_hostname }}"
+# Intentionally leaving this blank, instead of defaulting it to `syncthing_hostname`, to avoid specifying a hostname
+# which could render other services on that hostname potentially unreachable.
+# See: https://github.com/mother-of-all-self-hosting/mash-playbook/issues/391
+syncthing_container_hostname: ''
 
 # A list of additional "volumes" to mount in the container.
 #

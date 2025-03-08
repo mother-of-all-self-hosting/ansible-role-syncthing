@@ -23,6 +23,9 @@ ExecStartPre={{ devture_systemd_docker_base_host_command_docker }} create \
 			--cap-add=FOWNER \
 			--read-only \
 			--network={{ syncthing_container_network }} \
+			{% if syncthing_container_hostname %}
+			--hostname={{ syncthing_container_hostname }} \
+			{% endif %}
 			{% if syncthing_container_sync_tcp_bind_port %}
 			-p {{ syncthing_container_sync_tcp_bind_port }}:{{ syncthing_container_sync_tcp_port }}/tcp \
 			{% endif %}
