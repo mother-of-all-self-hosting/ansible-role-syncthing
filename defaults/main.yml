@@ -13,11 +13,14 @@
 syncthing_enabled: true
 
 syncthing_identifier: syncthing
+syncthing_base_path: "/{{ syncthing_identifier }}"
+syncthing_config_path: "{{ syncthing_base_path }}/config"
+syncthing_data_path: "{{ syncthing_base_path }}/data"
+
+syncthing_version: 1.29.5
 
 syncthing_uid: ''
 syncthing_gid: ''
-
-syncthing_version: 1.29.5
 
 # The hostname at which Syncthing is served.
 syncthing_hostname: ''
@@ -26,31 +29,6 @@ syncthing_hostname: ''
 # This value must either be `/` or not end with a slash (e.g. `/syncthing`).
 syncthing_path_prefix: /
 
-syncthing_base_path: "/{{ syncthing_identifier }}"
-syncthing_config_path: "{{ syncthing_base_path }}/config"
-syncthing_data_path: "{{ syncthing_base_path }}/data"
-
-syncthing_basicauth_enabled: true
-
-# A list of credential entries
-#
-# Example:
-# syncthing_credentials:
-#   - username: someone
-#     password: secret-password
-#   - username: another
-#     password: more-secret-password
-syncthing_basicauth_credentials: []
-
-# A list of `htpasswd -nb user password` entries
-# Also see `syncthing_basicauth_credentials` for a more convenient way to create credentials.
-# Ansible will run `htpasswd` on the entries in `syncthing_basicauth_credentials` and append them to this list.
-syncthing_basicauth_htpasswds: []
-
-# Temporary file path on the host that runs Ansible.
-# Used for converting the `syncthing_basicauth_credentials` entries to `syncthing_basicauth_htpasswds` entries.
-syncthing_basicauth_file_tmp: "/tmp/ansible_htpasswd"
-
 syncthing_container_image: "{{ syncthing_container_image_registry_prefix }}syncthing/syncthing:{{ syncthing_container_image_tag }}"
 syncthing_container_image_tag: "{{ syncthing_version }}"
 syncthing_container_image_registry_prefix: "{{ syncthing_container_image_registry_prefix_upstream }}"
@@ -58,30 +36,10 @@ syncthing_container_image_registry_prefix_upstream: "{{ syncthing_container_imag
 syncthing_container_image_registry_prefix_upstream_default: docker.io/
 syncthing_container_image_force_pull: "{{ syncthing_container_image.endswith(':latest') }}"
 
-# The base container network. It will be auto-created by this role if it doesn't exist already.
-syncthing_container_network: "{{ syncthing_identifier }}"
-
-# A list of additional container networks that the container would be connected to.
-# The role does not create these networks, so make sure they already exist.
-# Use this to expose this container to another reverse proxy, which runs in a different container network.
-syncthing_container_additional_networks: "{{ syncthing_container_additional_networks_auto + syncthing_container_additional_networks_custom }}"
-syncthing_container_additional_networks_auto: []
-syncthing_container_additional_networks_custom: []
-
-# Specifies where the container listens for sync via TCP
-#
-# Unless you have changed the "Sync Protocol Listen Addresses" (`<ListenAddress>`) configuration, this defaults to 22000.
-syncthing_container_sync_tcp_port: '22000'
-
 # Specifies how the container publishes its TCP sync port (syncthing_container_sync_tcp_port)
 #
 # Takes an "<ip>:<port>" value (e.g. "127.0.0.1:22000"), just a port number or an empty string to not expose.
 syncthing_container_sync_tcp_bind_port: "{{ syncthing_container_sync_tcp_port }}"
-
-# Specifies where the container listens for sync via UDP
-#
-# Unless you have changed the "Sync Protocol Listen Addresses" (`<ListenAddress>`) configuration, this defaults to 22000.
-syncthing_container_sync_udp_port: "22000"
 
 # Specifies how the container publishes its UDP sync port (syncthing_container_sync_udp_port)
 #
@@ -92,6 +50,41 @@ syncthing_container_sync_udp_bind_port: "{{ syncthing_container_sync_udp_port }}
 #
 # Takes an "<ip>:<port>" value (e.g. "127.0.0.1:21027"), just a port number or an empty string to not expose.
 syncthing_container_local_discovery_udp_bind_port: '21027'
+
+# The base container network. It will be auto-created by this role if it doesn't exist already.
+syncthing_container_network: "{{ syncthing_identifier }}"
+
+# Specifies where the container listens for sync via TCP
+#
+# Unless you have changed the "Sync Protocol Listen Addresses" (`<ListenAddress>`) configuration, this defaults to 22000.
+syncthing_container_sync_tcp_port: '22000'
+
+# Specifies where the container listens for sync via UDP
+#
+# Unless you have changed the "Sync Protocol Listen Addresses" (`<ListenAddress>`) configuration, this defaults to 22000.
+syncthing_container_sync_udp_port: "22000"
+
+# A list of additional container networks that the container would be connected to.
+# The role does not create these networks, so make sure they already exist.
+# Use this to expose this container to another reverse proxy, which runs in a different container network.
+syncthing_container_additional_networks: "{{ syncthing_container_additional_networks_auto + syncthing_container_additional_networks_custom }}"
+syncthing_container_additional_networks_auto: []
+syncthing_container_additional_networks_custom: []
+
+# A list of additional "volumes" to mount in the container.
+#
+# See the `--mount` documentation for the `docker run` command.
+#
+# Example:
+# syncthing_container_additional_volumes:
+#   - type: bind
+#     src: /path/on/the/host
+#     dst: /data
+#   - type: bind
+#     src: /another-path/on/the/host
+#     dst: /read-only
+#     options: readonly
+syncthing_container_additional_volumes: []
 
 # syncthing_container_labels_traefik_enabled controls whether labels to assist a Traefik reverse-proxy will be attached to the container.
 # See `../templates/labels.j2` for details.
@@ -137,6 +130,9 @@ syncthing_container_labels_traefik_additional_response_headers_custom: {}
 #   another.label="here"
 syncthing_container_labels_additional_labels: ''
 
+# A list of extra arguments to pass to the container
+syncthing_container_extra_arguments: []
+
 # Specifies how often the container health-check will run.
 #
 # For Traefik based setups, it's important that the interval is short,
@@ -152,27 +148,6 @@ syncthing_container_health_interval: "{{ '5s' if syncthing_container_labels_trae
 # which could render other services on that hostname potentially unreachable.
 # See: https://github.com/mother-of-all-self-hosting/mash-playbook/issues/391
 syncthing_container_hostname: ''
-
-# A list of additional "volumes" to mount in the container.
-#
-# See the `--mount` documentation for the `docker run` command.
-#
-# Example:
-# syncthing_container_additional_volumes:
-#   - type: bind
-#     src: /path/on/the/host
-#     dst: /data
-#   - type: bind
-#     src: /another-path/on/the/host
-#     dst: /read-only
-#     options: readonly
-syncthing_container_additional_volumes: []
-
-# A list of extra arguments to pass to the container
-syncthing_container_extra_arguments: []
-
-# Additional environment variables.
-syncthing_environment_variables_additional_variables: ''
 
 # Specifies the value of the `X-XSS-Protection` header
 # Stops pages from loading when they detect reflected cross-site scripting (XSS) attacks.
@@ -229,3 +204,27 @@ syncthing_systemd_required_services_list_custom: []
 
 # List of systemd services that the Syncthing systemd service wants
 syncthing_systemd_wanted_services_list: []
+
+syncthing_basicauth_enabled: true
+
+# A list of credential entries
+#
+# Example:
+# syncthing_credentials:
+#   - username: someone
+#     password: secret-password
+#   - username: another
+#     password: more-secret-password
+syncthing_basicauth_credentials: []
+
+# A list of `htpasswd -nb user password` entries
+# Also see `syncthing_basicauth_credentials` for a more convenient way to create credentials.
+# Ansible will run `htpasswd` on the entries in `syncthing_basicauth_credentials` and append them to this list.
+syncthing_basicauth_htpasswds: []
+
+# Temporary file path on the host that runs Ansible.
+# Used for converting the `syncthing_basicauth_credentials` entries to `syncthing_basicauth_htpasswds` entries.
+syncthing_basicauth_file_tmp: "/tmp/ansible_htpasswd"
+
+# Additional environment variables.
+syncthing_environment_variables_additional_variables: ''
