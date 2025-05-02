@@ -17,6 +17,7 @@ syncthing_base_path: "/{{ syncthing_identifier }}"
 syncthing_config_path: "{{ syncthing_base_path }}/config"
 syncthing_data_path: "{{ syncthing_base_path }}/data"
 
+# renovate: datasource=docker depName=syncthing/syncthing versioning=semver
 syncthing_version: 1.29.5
 
 syncthing_uid: ''
