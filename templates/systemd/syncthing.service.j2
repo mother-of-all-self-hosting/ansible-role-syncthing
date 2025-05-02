@@ -11,6 +11,9 @@ Description=Syncthing ({{ syncthing_identifier }})
 Requires={{ service }}
 After={{ service }}
 {% endfor %}
+{% for service in syncthing_systemd_wanted_services_list %}
+Wants={{ service }}
+{% endfor %}
 DefaultDependencies=no
 
 [Service]
