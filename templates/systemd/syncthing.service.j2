@@ -23,39 +23,39 @@ ExecStartPre=-{{ devture_systemd_docker_base_host_command_sh }} -c '{{ devture_s
 ExecStartPre=-{{ devture_systemd_docker_base_host_command_sh }} -c '{{ devture_systemd_docker_base_host_command_docker }} rm {{ syncthing_identifier }} 2>/dev/null || true'
 
 ExecStartPre={{ devture_systemd_docker_base_host_command_docker }} create \
-			--rm \
-			--name={{ syncthing_identifier }} \
-			--log-driver=none \
-			--user={{ syncthing_uid }}:{{ syncthing_gid }} \
-			--cap-drop=ALL \
-			--cap-add=CHOWN \
-			--cap-add=FOWNER \
-			--read-only \
-			--network={{ syncthing_container_network }} \
-			{% if syncthing_container_hostname %}
-			--hostname={{ syncthing_container_hostname }} \
-			{% endif %}
-			{% if syncthing_container_sync_tcp_bind_port %}
-			-p {{ syncthing_container_sync_tcp_bind_port }}:{{ syncthing_container_sync_tcp_port }}/tcp \
-			{% endif %}
-			{% if syncthing_container_sync_udp_bind_port %}
-			-p {{ syncthing_container_sync_udp_bind_port }}:{{ syncthing_container_sync_udp_port }}/udp \
-			{% endif %}
-			{% if syncthing_container_local_discovery_udp_bind_port %}
-			-p {{ syncthing_container_local_discovery_udp_bind_port }}:21027/udp \
-			{% endif %}
-			--env-file={{ syncthing_base_path }}/env \
-			--label-file={{ syncthing_base_path }}/labels \
-			--health-interval={{ syncthing_container_health_interval }} \
-			--mount type=bind,src={{ syncthing_config_path }},dst=/var/syncthing \
-			--mount type=bind,src={{ syncthing_data_path }},dst=/data \
-			{% for volume in syncthing_container_additional_volumes %}
-			--mount type={{ volume.type | default('bind' if '/' in volume.src else 'volume') }},src={{ volume.src }},dst={{ volume.dst }}{{ (',' + volume.options) if volume.options | default('') else '' }} \
-			{% endfor %}
-			{% for arg in syncthing_container_extra_arguments %}
-			{{ arg }} \
-			{% endfor %}
-			{{ syncthing_container_image }}
+      --rm \
+      --name={{ syncthing_identifier }} \
+      --log-driver=none \
+      --user={{ syncthing_uid }}:{{ syncthing_gid }} \
+      --cap-drop=ALL \
+      --cap-add=CHOWN \
+      --cap-add=FOWNER \
+      --read-only \
+      --network={{ syncthing_container_network }} \
+      {% if syncthing_container_hostname %}
+      --hostname={{ syncthing_container_hostname }} \
+      {% endif %}
+      {% if syncthing_container_sync_tcp_bind_port %}
+      -p {{ syncthing_container_sync_tcp_bind_port }}:{{ syncthing_container_sync_tcp_port }}/tcp \
+      {% endif %}
+      {% if syncthing_container_sync_udp_bind_port %}
+      -p {{ syncthing_container_sync_udp_bind_port }}:{{ syncthing_container_sync_udp_port }}/udp \
+      {% endif %}
+      {% if syncthing_container_local_discovery_udp_bind_port %}
+      -p {{ syncthing_container_local_discovery_udp_bind_port }}:21027/udp \
+      {% endif %}
+      --env-file={{ syncthing_base_path }}/env \
+      --label-file={{ syncthing_base_path }}/labels \
+      --health-interval={{ syncthing_container_health_interval }} \
+      --mount type=bind,src={{ syncthing_config_path }},dst=/var/syncthing \
+      --mount type=bind,src={{ syncthing_data_path }},dst=/data \
+      {% for volume in syncthing_container_additional_volumes %}
+      --mount type={{ volume.type | default('bind' if '/' in volume.src else 'volume') }},src={{ volume.src }},dst={{ volume.dst }}{{ (',' + volume.options) if volume.options | default('') else '' }} \
+      {% endfor %}
+      {% for arg in syncthing_container_extra_arguments %}
+      {{ arg }} \
+      {% endfor %}
+      {{ syncthing_container_image }}
 
 {% for network in syncthing_container_additional_networks %}
 ExecStartPre={{ devture_systemd_docker_base_host_command_docker }} network connect {{ network }} {{ syncthing_identifier }}
