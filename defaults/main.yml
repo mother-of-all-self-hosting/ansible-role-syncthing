@@ -1,4 +1,8 @@
-# SPDX-FileCopyrightText: 2024 - 2025 Slavi Pantaleev
+# SPDX-FileCopyrightText: 2023 - 2024 Nikita Chernyi
+# SPDX-FileCopyrightText: 2023 - 2025 Slavi Pantaleev
+# SPDX-FileCopyrightText: 2024 Sergio Durigan Junior
+# SPDX-FileCopyrightText: 2025 MASH project contributors
+# SPDX-FileCopyrightText: 2025 Suguru Hirahara
 #
 # SPDX-License-Identifier: AGPL-3.0-or-later
 
@@ -48,8 +52,10 @@ syncthing_basicauth_htpasswds: []
 syncthing_basicauth_file_tmp: "/tmp/ansible_htpasswd"
 
 syncthing_container_image: "{{ syncthing_container_image_registry_prefix }}syncthing/syncthing:{{ syncthing_container_image_tag }}"
-syncthing_container_image_registry_prefix: docker.io/
 syncthing_container_image_tag: "{{ syncthing_version }}"
+syncthing_container_image_registry_prefix: "{{ syncthing_container_image_registry_prefix_upstream }}"
+syncthing_container_image_registry_prefix_upstream: "{{ syncthing_container_image_registry_prefix_upstream_default }}"
+syncthing_container_image_registry_prefix_upstream_default: docker.io/
 syncthing_container_image_force_pull: "{{ syncthing_container_image.endswith(':latest') }}"
 
 # The base container network. It will be auto-created by this role if it doesn't exist already.
