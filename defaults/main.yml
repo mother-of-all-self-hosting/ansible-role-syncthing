@@ -121,7 +121,6 @@ syncthing_container_labels_traefik_additional_response_headers_auto: |
   {{
     {}
     | combine ({'X-XSS-Protection': syncthing_http_header_xss_protection} if syncthing_http_header_xss_protection else {})
-    | combine ({'X-Frame-Options': syncthing_http_header_frame_options} if syncthing_http_header_frame_options else {})
     | combine ({'X-Content-Type-Options': syncthing_http_header_content_type_options} if syncthing_http_header_content_type_options else {})
     | combine ({'Content-Security-Policy': syncthing_http_header_content_security_policy} if syncthing_http_header_content_security_policy else {})
     | combine ({'Permission-Policy': syncthing_http_header_content_permission_policy} if syncthing_http_header_content_permission_policy else {})
@@ -182,10 +181,6 @@ syncthing_environment_variables_additional_variables: ''
 # - https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-XSS-Protection
 # - https://portswigger.net/web-security/cross-site-scripting/reflected
 syncthing_http_header_xss_protection: "1; mode=block"
-
-# Specifies the value of the `X-Frame-Options` header which controls whether framing can happen.
-# See: https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-Frame-Options
-syncthing_http_header_frame_options: SAMEORIGIN
 
 # Specifies the value of the `X-Content-Type-Options` header.
 # See: https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-Content-Type-Options
