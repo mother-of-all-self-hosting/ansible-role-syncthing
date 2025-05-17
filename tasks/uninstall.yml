@@ -23,7 +23,7 @@
         path: "{{ devture_systemd_docker_base_systemd_path }}/{{ syncthing_identifier }}.service"
         state: absent
 
-    - name: Ensure Syncthing path doesn't exist
+    - name: Ensure Syncthing path does not exist
       ansible.builtin.file:
         path: "{{ syncthing_base_path }}"
         state: absent
