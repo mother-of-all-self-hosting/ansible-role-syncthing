@@ -25,7 +25,7 @@
       become: false
       delegate_to: 127.0.0.1
 
-    - name: Convert syncthing credentials to htpasswd entries
+    - name: Convert Syncthing credentials to htpasswd entries
       ansible.builtin.include_tasks: "{{ role_path }}/tasks/includes/convert_credentials_to_htpasswd.yml"
       with_items: "{{ syncthing_basicauth_credentials | unique }}"
       loop_control:
