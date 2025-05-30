@@ -3,27 +3,25 @@
 # SPDX-License-Identifier: AGPL-3.0-or-later
 
 ---
-
 - name: Perform Syncthing installation tasks
-  block:
-    - name: Validate Syncthing configuration
-      when: syncthing_enabled | bool
-      ansible.builtin.include_tasks: "{{ role_path }}/tasks/validate_config.yml"
-
-    - name: Install Syncthing
-      when: syncthing_enabled | bool
-      ansible.builtin.include_tasks: "{{ role_path }}/tasks/install.yml"
   tags:
     - setup-all
     - setup-syncthing
     - install-all
     - install-syncthing
+  block:
+    - name: Validate Syncthing configuration
+      when: syncthing_enabled | bool
+      ansible.builtin.include_tasks: "{{ role_path }}/tasks/validate_config.yml"
+    - name: Install Syncthing
+      when: syncthing_enabled | bool
+      ansible.builtin.include_tasks: "{{ role_path }}/tasks/install.yml"
 
 - name: Perform Syncthing uninstallation tasks
+  tags:
+    - setup-all
+    - setup-syncthing
   block:
     - name: Uninstall Syncthing
       when: not syncthing_enabled | bool
       ansible.builtin.include_tasks: "{{ role_path }}/tasks/uninstall.yml"
-  tags:
-    - setup-all
-    - setup-syncthing

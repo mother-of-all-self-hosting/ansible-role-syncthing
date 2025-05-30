@@ -3,7 +3,6 @@
 # SPDX-License-Identifier: AGPL-3.0-or-later
 
 ---
-
 - name: Fail if required Syncthing settings not defined
   ansible.builtin.fail:
     msg: >
@@ -24,7 +23,8 @@
       credentials in `syncthing_basicauth_credentials` or `syncthing_basicauth_htpasswds`.
   when: "syncthing_basicauth_enabled and (syncthing_basicauth_credentials | length + syncthing_basicauth_htpasswds | length == 0)"
 
-- when: syncthing_container_labels_traefik_enabled | bool
+- name: Run if Traefik is enabled
+  when: syncthing_container_labels_traefik_enabled | bool
   block:
     - name: Fail if required Syncthing Traefik settings not defined
       ansible.builtin.fail:

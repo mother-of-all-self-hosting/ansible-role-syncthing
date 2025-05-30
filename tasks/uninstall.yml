@@ -3,13 +3,13 @@
 # SPDX-License-Identifier: AGPL-3.0-or-later
 
 ---
-
 - name: Check existence of Syncthing systemd service
   ansible.builtin.stat:
     path: "{{ devture_systemd_docker_base_systemd_path }}/{{ syncthing_identifier }}.service"
   register: syncthing_service_stat
 
-- when: syncthing_service_stat.stat.exists | bool
+- name: Uninstall Syncthing systemd services and files
+  when: syncthing_service_stat.stat.exists | bool
   block:
     - name: Ensure Syncthing systemd service is stopped
       ansible.builtin.service:
