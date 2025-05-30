@@ -17,7 +17,7 @@
     - syncthing_path_prefix
     - syncthing_container_network
 
-- name: Fail if required Syncthing basic auth enabled, but no credentials specified
+- name: Fail if required Syncthing Basic Auth enabled, but no credentials specified
   ansible.builtin.fail:
     msg: >-
       When enabling Basic Auth for Syncthing (`syncthing_basicauth_enabled`), you need to provide at least one set of

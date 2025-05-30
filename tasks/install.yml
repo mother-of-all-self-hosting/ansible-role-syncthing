@@ -18,7 +18,7 @@
 
 - when: syncthing_basicauth_enabled | bool
   block:
-    - name: Ensure local temporary basic auth file does not exist to start with
+    - name: Ensure local temporary Basic Auth file does not exist to start with
       ansible.builtin.file:
         path: "{{ syncthing_basicauth_file_tmp }}"
         state: absent
