@@ -62,7 +62,7 @@
   retries: "{{ devture_playbook_help_container_retries_count }}"
   delay: "{{ devture_playbook_help_container_retries_delay }}"
   until: result is not failed
-  changed_when: result.rc == 0
+  changed_when: "'Downloaded newer image' in result.stdout or 'Image is up to date' not in result.stdout"
   failed_when: result.rc != 0
 
 - name: Ensure Syncthing container network is created via community.docker.docker_network
