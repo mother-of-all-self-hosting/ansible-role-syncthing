@@ -4,6 +4,7 @@
 
 ---
 - name: Perform Syncthing installation tasks
+  when: syncthing_enabled | bool
   tags:
     - setup-all
     - setup-syncthing
@@ -11,17 +12,15 @@
     - install-syncthing
   block:
     - name: Validate Syncthing configuration
-      when: syncthing_enabled | bool
       ansible.builtin.include_tasks: "{{ role_path }}/tasks/validate_config.yml"
     - name: Install Syncthing
-      when: syncthing_enabled | bool
       ansible.builtin.include_tasks: "{{ role_path }}/tasks/install.yml"
 
 - name: Perform Syncthing uninstallation tasks
+  when: not syncthing_enabled | bool
   tags:
     - setup-all
     - setup-syncthing
   block:
     - name: Uninstall Syncthing
-      when: not syncthing_enabled | bool
       ansible.builtin.include_tasks: "{{ role_path }}/tasks/uninstall.yml"
