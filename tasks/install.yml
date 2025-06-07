@@ -15,7 +15,7 @@
     - "{{ syncthing_config_path }}"
     - "{{ syncthing_data_path }}"
 
-- name: Run if HTTP Basic authentication is enabled for Syncthing
+- name: Run if HTTP Basic authentication is enabled
   when: syncthing_basicauth_enabled | bool
   block:
     - name: Ensure local temporary HTTP Basic authentication file does not exist to start with
