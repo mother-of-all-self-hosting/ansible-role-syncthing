@@ -54,7 +54,7 @@ ExecStartPre={{ devture_systemd_docker_base_host_command_docker }} create \
       {% for arg in syncthing_container_extra_arguments %}
       {{ arg }} \
       {% endfor %}
-      {{ syncthing_container_image }}
+      {{ syncthing_container_image_self_build_name if syncthing_container_image_self_build else syncthing_container_image }}
 
 {% for network in syncthing_container_additional_networks %}
 ExecStartPre={{ devture_systemd_docker_base_host_command_docker }} network connect {{ network }} {{ syncthing_identifier }}
