@@ -17,7 +17,7 @@ syncthing_base_path: "/{{ syncthing_identifier }}"
 syncthing_config_path: "{{ syncthing_base_path }}/config"
 syncthing_data_path: "{{ syncthing_base_path }}/data"
 
-# renovate: datasource=docker depName=syncthing/syncthing versioning=semver
+# renovate: datasource=docker depName=ghcr.io/syncthing/syncthing versioning=semver
 syncthing_version: 1.30.0
 
 syncthing_uid: ''
@@ -34,7 +34,7 @@ syncthing_container_image: "{{ syncthing_container_image_registry_prefix }}synct
 syncthing_container_image_tag: "{{ syncthing_version }}"
 syncthing_container_image_registry_prefix: "{{ syncthing_container_image_registry_prefix_upstream }}"
 syncthing_container_image_registry_prefix_upstream: "{{ syncthing_container_image_registry_prefix_upstream_default }}"
-syncthing_container_image_registry_prefix_upstream_default: docker.io/
+syncthing_container_image_registry_prefix_upstream_default: ghcr.io/
 syncthing_container_image_force_pull: "{{ syncthing_container_image.endswith(':latest') }}"
 
 syncthing_container_image_self_build: false
