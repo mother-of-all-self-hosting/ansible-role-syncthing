@@ -61,6 +61,9 @@ syncthing_container_local_discovery_udp_bind_port: '21027'
 # The base container network. It will be auto-created by this role if it doesn't exist already.
 syncthing_container_network: "{{ syncthing_identifier }}"
 
+# The port number in the container
+syncthing_container_http_port: 8384
+
 # Specifies where the container listens for sync via TCP
 #
 # Unless you have changed the "Sync Protocol Listen Addresses" (`<ListenAddress>`) configuration, this defaults to 22000.
