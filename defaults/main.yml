@@ -114,7 +114,7 @@ syncthing_container_labels_traefik_tls: "{{ syncthing_container_labels_traefik_e
 syncthing_container_labels_traefik_tls_certResolver: default  # noqa var-naming
 
 # Controls which additional headers to attach to all HTTP requests.
-# To add your own custom request headers, use `syncthing_container_labels_traefik_additional_response_headers_custom`
+# To add your own custom request headers, use `syncthing_container_labels_traefik_additional_request_headers_custom`
 syncthing_container_labels_traefik_additional_request_headers: "{{ syncthing_container_labels_traefik_additional_request_headers_auto | combine(syncthing_container_labels_traefik_additional_request_headers_custom) }}"
 syncthing_container_labels_traefik_additional_request_headers_auto: {}
 syncthing_container_labels_traefik_additional_request_headers_custom: {}
