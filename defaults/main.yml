@@ -86,17 +86,9 @@ syncthing_container_additional_networks_custom: []
 # if you wish to mount your own files into the container.
 # Contains definition objects like this: `{"type": "bind", "src": "/outside", "dst": "/inside", "options": "readonly"}.
 # See the `--mount` documentation for the `docker run` command.
-#
-# Example:
-# syncthing_container_additional_volumes:
-#   - type: bind
-#     src: /path/on/the/host
-#     dst: /data
-#   - type: bind
-#     src: /another-path/on/the/host
-#     dst: /read-only
-#     options: readonly
-syncthing_container_additional_volumes: []
+syncthing_container_additional_volumes: "{{ syncthing_container_additional_volumes_auto + syncthing_container_additional_volumes_custom }}"
+syncthing_container_additional_volumes_auto: []
+syncthing_container_additional_volumes_custom: []
 
 # syncthing_container_labels_traefik_enabled controls whether labels to assist a Traefik reverse-proxy will be attached to the container.
 # See `../templates/labels.j2` for details.
