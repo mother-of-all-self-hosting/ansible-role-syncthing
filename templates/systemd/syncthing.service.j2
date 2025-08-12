@@ -51,6 +51,11 @@ ExecStartPre={{ devture_systemd_docker_base_host_command_docker }} create \
       {% for volume in syncthing_container_additional_volumes %}
       --mount type={{ volume.type | default('bind' if '/' in volume.src else 'volume') }},src={{ volume.src }},dst={{ volume.dst }}{{ (',' + volume.options) if volume.options | default('') else '' }} \
       {% endfor %}
+      {% if syncthing_container_tmp_on_tmpfs_enabled %}
+      --tmpfs=/tmp:rw,noexec,nosuid,size={{ syncthing_container_tmp_on_tmpfs_size_mb }}m \
+      {% else %}
+      --mount type=bind,src={{ syncthing_tmp_path }},dst=/tmp \
+      {% endif %}
       {% for arg in syncthing_container_extra_arguments %}
       {{ arg }} \
       {% endfor %}

@@ -3,17 +3,30 @@
 # SPDX-License-Identifier: AGPL-3.0-or-later
 
 ---
+
 - name: Ensure Syncthing paths exist
   ansible.builtin.file:
-    path: "{{ item }}"
+    path: "{{ item.path }}"
     state: directory
     mode: "0750"
     owner: "{{ syncthing_uid }}"
     group: "{{ syncthing_gid }}"
   with_items:
-    - "{{ syncthing_base_path }}"
-    - "{{ syncthing_config_path }}"
-    - "{{ syncthing_data_path }}"
+    - path: "{{ syncthing_base_path }}"
+      when: true
+    - path: "{{ syncthing_config_path }}"
+      when: true
+    - path: "{{ syncthing_data_path }}"
+      when: true
+    - path: "{{ syncthing_tmp_path }}"
+      when: "{{ not syncthing_container_tmp_on_tmpfs_enabled }}"
+  when: item.when | bool
+
+- name: Ensure Syncthing tmp path removed if tmp-on-tmpfs enabled
+  when: syncthing_container_tmp_on_tmpfs_enabled | bool
+  ansible.builtin.file:
+    path: "{{ syncthing_tmp_path }}"
+    state: absent
 
 - name: Run if HTTP Basic authentication is enabled
   when: syncthing_basicauth_enabled | bool
