@@ -18,7 +18,7 @@ syncthing_config_path: "{{ syncthing_base_path }}/config"
 syncthing_data_path: "{{ syncthing_base_path }}/data"
 
 # renovate: datasource=docker depName=ghcr.io/syncthing/syncthing versioning=semver
-syncthing_version: 1.30.0
+syncthing_version: 2.0.0
 
 syncthing_uid: ''
 syncthing_gid: ''
