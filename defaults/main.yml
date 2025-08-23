@@ -214,7 +214,10 @@ syncthing_systemd_required_services_list_auto: []
 syncthing_systemd_required_services_list_custom: []
 
 # List of systemd services that the Syncthing systemd service wants
-syncthing_systemd_wanted_services_list: []
+syncthing_systemd_wanted_services_list: "{{ syncthing_systemd_wanted_services_list_default + syncthing_systemd_wanted_services_list_auto + syncthing_systemd_wanted_services_list_custom }}"
+syncthing_systemd_wanted_services_list_default: []
+syncthing_systemd_wanted_services_list_auto: []
+syncthing_systemd_wanted_services_list_custom: []
 
 syncthing_basicauth_enabled: true
 
