@@ -219,6 +219,9 @@ syncthing_systemd_wanted_services_list_default: []
 syncthing_systemd_wanted_services_list_auto: []
 syncthing_systemd_wanted_services_list_custom: []
 
+# Specify the timezone
+syncthing_environment_variables_tz: UTC
+
 syncthing_basicauth_enabled: true
 
 # A list of credential entries
