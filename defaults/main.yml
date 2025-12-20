@@ -137,7 +137,9 @@ syncthing_container_labels_traefik_additional_response_headers_custom: {}
 syncthing_container_labels_additional_labels: ''
 
 # A list of extra arguments to pass to the container
-syncthing_container_extra_arguments: []
+syncthing_container_extra_arguments: "{{ syncthing_container_extra_arguments_auto + syncthing_container_extra_arguments_custom }}"
+syncthing_container_extra_arguments_auto: []
+syncthing_container_extra_arguments_custom: []
 
 # Specifies how often the container health-check will run.
 #
