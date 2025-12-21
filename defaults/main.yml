@@ -22,11 +22,11 @@ syncthing_tmp_path: "{{ syncthing_base_path }}/tmp"
 # renovate: datasource=docker depName=ghcr.io/syncthing/syncthing versioning=semver
 syncthing_version: 2.0.12
 
-syncthing_uid: ''
-syncthing_gid: ''
+syncthing_uid: ""
+syncthing_gid: ""
 
 # The hostname at which Syncthing is served.
-syncthing_hostname: ''
+syncthing_hostname: ""
 
 # The path at which Syncthing is served.
 # This value must either be `/` or not end with a slash (e.g. `/syncthing`).
@@ -158,7 +158,7 @@ syncthing_container_health_interval: "{{ '5s' if syncthing_container_labels_trae
 # Intentionally leaving this blank, instead of defaulting it to `syncthing_hostname`, to avoid specifying a hostname
 # which could render other services on that hostname potentially unreachable.
 # See: https://github.com/mother-of-all-self-hosting/mash-playbook/issues/391
-syncthing_container_hostname: ''
+syncthing_container_hostname: ""
 
 # Controls whether /tmp should be a tmpfs.
 # If not enabled, /tmp will be persisted to disk (see `syncthing_tmp_path`).
@@ -249,4 +249,4 @@ syncthing_basicauth_htpasswds: []
 syncthing_basicauth_file_tmp: "/tmp/ansible_htpasswd"
 
 # Additional environment variables.
-syncthing_environment_variables_additional_variables: ''
+syncthing_environment_variables_additional_variables: ""
