@@ -60,4 +60,6 @@ traefik.http.routers.{{ syncthing_identifier }}.tls.certResolver={{ syncthing_co
 traefik.http.services.{{ syncthing_identifier }}.loadbalancer.server.port={{ syncthing_container_http_port }}
 {% endif %}
 
-{{ syncthing_container_labels_additional_labels }}
+{% for arg in syncthing_container_labels_additional_labels %}
+{{ arg }}
+{% endfor %}
