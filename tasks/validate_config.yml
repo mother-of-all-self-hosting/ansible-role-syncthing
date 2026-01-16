@@ -10,6 +10,8 @@
       Please change your configuration to rename the variable (`{{ item.old }}` -> `{{ item.new }}`).
   when: "lookup('ansible.builtin.varnames', ('^' + item.old + '$'), wantlist=True) | length > 0"
   with_items:
+    - { "old": "syncthing_container_tmp_on_tmpfs_enabled", "new": "syncthing_container_tmpfs_tmp_enabled" }
+    - { "old": "syncthing_container_tmp_on_tmpfs_size_mb", "new": "syncthing_container_tmpfs_tmp_size" }
     - { "old": "syncthing_http_header_content_permission_policy", "new": "syncthing_http_header_permissions_policy" }
 
 - name: Fail if required Syncthing settings not defined

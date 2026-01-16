@@ -19,11 +19,11 @@
     - path: "{{ syncthing_data_path }}"
       when: true
     - path: "{{ syncthing_tmp_path }}"
-      when: "{{ not syncthing_container_tmp_on_tmpfs_enabled }}"
+      when: "{{ not syncthing_container_tmpfs_tmp_enabled }}"
   when: item.when | bool
 
 - name: Ensure Syncthing tmp path removed if tmp-on-tmpfs enabled
-  when: syncthing_container_tmp_on_tmpfs_enabled | bool
+  when: syncthing_container_tmpfs_tmp_enabled | bool
   ansible.builtin.file:
     path: "{{ syncthing_tmp_path }}"
     state: absent

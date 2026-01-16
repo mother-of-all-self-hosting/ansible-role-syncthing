@@ -16,7 +16,7 @@ syncthing_identifier: syncthing
 syncthing_base_path: "/{{ syncthing_identifier }}"
 syncthing_config_path: "{{ syncthing_base_path }}/config"
 syncthing_data_path: "{{ syncthing_base_path }}/data"
-# See `syncthing_container_tmp_on_tmpfs_enabled`
+# See `syncthing_container_tmpfs_tmp_enabled`
 syncthing_tmp_path: "{{ syncthing_base_path }}/tmp"
 
 # renovate: datasource=docker depName=ghcr.io/syncthing/syncthing versioning=semver
@@ -162,8 +162,8 @@ syncthing_container_hostname: ""
 
 # Controls whether /tmp should be a tmpfs.
 # If not enabled, /tmp will be persisted to disk (see `syncthing_tmp_path`).
-syncthing_container_tmp_on_tmpfs_enabled: true
-syncthing_container_tmp_on_tmpfs_size_mb: "{{ (ansible_memtotal_mb / 2) | round | int }}"
+syncthing_container_tmpfs_tmp_enabled: true
+syncthing_container_tmpfs_tmp_size: "{{ (ansible_memtotal_mb / 2) | round | int }}m"
 
 # Specifies the value of the `X-XSS-Protection` header
 # Stops pages from loading when they detect reflected cross-site scripting (XSS) attacks.
