@@ -212,7 +212,7 @@ syncthing_floc_optout_enabled: true
 # See: `syncthing_http_header_strict_transport_security`
 syncthing_hsts_preload_enabled: false
 
-# List of systemd services that Syncthing systemd service depends on
+# List of systemd services that the Syncthing systemd service depends on
 syncthing_systemd_required_services_list: "{{ syncthing_systemd_required_services_list_default + syncthing_systemd_required_services_list_auto + syncthing_systemd_required_services_list_custom }}"
 syncthing_systemd_required_services_list_default: "{{ [devture_systemd_docker_base_docker_service_name] if devture_systemd_docker_base_docker_service_name else [] }}"
 syncthing_systemd_required_services_list_auto: []
