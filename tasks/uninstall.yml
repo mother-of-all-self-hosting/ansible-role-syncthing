@@ -29,6 +29,7 @@
       community.docker.docker_network:
         name: "{{ syncthing_container_network }}"
         state: absent
+      register: syncthing_network_deletion_result
 
     - name: Ensure Syncthing container network does not exist via ansible.builtin.command
       when: devture_systemd_docker_base_container_network_creation_method == 'command'
@@ -36,8 +37,8 @@
         cmd: >-
           {{ devture_systemd_docker_base_host_command_docker }} network rm
           {{ syncthing_container_network }}
-      register: network_deletion_result
-      changed_when: syncthing_container_network in network_deletion_result.stdout
+      register: syncthing_network_deletion_result
+      changed_when: syncthing_container_network in syncthing_network_deletion_result.stdout
 
     - name: Ensure Syncthing path does not exist
       ansible.builtin.file:
