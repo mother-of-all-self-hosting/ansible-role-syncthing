@@ -34,6 +34,9 @@ ExecStartPre={{ devture_systemd_docker_base_host_command_docker }} create \
       {% if syncthing_container_hostname %}
       --hostname={{ syncthing_container_hostname }} \
       {% endif %}
+      {% if syncthing_container_http_host_bind_port %}
+      -p {{ syncthing_container_http_host_bind_port }}:{{ syncthing_container_http_port }} \
+      {% endif %}
       {% if syncthing_container_sync_tcp_bind_port %}
       -p {{ syncthing_container_sync_tcp_bind_port }}:{{ syncthing_container_sync_tcp_port }}/tcp \
       {% endif %}
