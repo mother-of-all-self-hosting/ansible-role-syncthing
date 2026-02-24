@@ -1,5 +1,6 @@
 {#
-SPDX-FileCopyrightText: 2024 - 2025 Slavi Pantaleev
+SPDX-FileCopyrightText: 2024, 2025 Slavi Pantaleev
+SPDX-FileCopyrightText: 2026 Suguru Hirahara
 
 SPDX-License-Identifier: AGPL-3.0-or-later
 #}
@@ -37,10 +38,10 @@ ExecStartPre={{ devture_systemd_docker_base_host_command_docker }} create \
       {% if syncthing_container_http_host_bind_port %}
       -p {{ syncthing_container_http_host_bind_port }}:{{ syncthing_container_http_port }} \
       {% endif %}
-      {% if syncthing_container_sync_tcp_bind_port %}
+      {% if syncthing_container_sync_tcp_bind_port and not syncthing_container_labels_traefik_tcp_enabled %}
       -p {{ syncthing_container_sync_tcp_bind_port }}:{{ syncthing_container_sync_tcp_port }}/tcp \
       {% endif %}
-      {% if syncthing_container_sync_udp_bind_port %}
+      {% if syncthing_container_sync_udp_bind_port and not syncthing_container_labels_traefik_udp_enabled %}
       -p {{ syncthing_container_sync_udp_bind_port }}:{{ syncthing_container_sync_udp_port }}/udp \
       {% endif %}
       {% if syncthing_container_local_discovery_udp_bind_port %}

@@ -1,5 +1,6 @@
 {#
 SPDX-FileCopyrightText: 2024 Slavi Pantaleev
+SPDX-FileCopyrightText: 2026 Suguru Hirahara
 
 SPDX-License-Identifier: AGPL-3.0-or-later
 #}
@@ -58,6 +59,30 @@ traefik.http.routers.{{ syncthing_identifier }}.tls.certResolver={{ syncthing_co
 {% endif %}
 
 traefik.http.services.{{ syncthing_identifier }}.loadbalancer.server.port={{ syncthing_container_http_port }}
+{% endif %}
+
+{% if syncthing_container_labels_traefik_tcp_enabled %}
+
+traefik.tcp.routers.{{ syncthing_identifier }}.rule={{ syncthing_container_labels_traefik_tcp_rule }}
+{% if syncthing_container_labels_traefik_tcp_priority | int > 0 %}
+traefik.tcp.routers.{{ syncthing_identifier }}.priority={{ syncthing_container_labels_traefik_tcp_priority }}
+{% endif %}
+traefik.tcp.routers.{{ syncthing_identifier }}.service={{ syncthing_identifier }}
+traefik.tcp.routers.{{ syncthing_identifier }}.entrypoints={{ syncthing_container_labels_traefik_tcp_entrypoints }}
+traefik.tcp.routers.{{ syncthing_identifier }}.tls={{ syncthing_container_labels_traefik_tcp_tls | to_json }}
+{% if syncthing_container_labels_traefik_tcp_tls %}
+traefik.tcp.routers.{{ syncthing_identifier }}.tls.certResolver={{ syncthing_container_labels_traefik_tcp_tls_certResolver }}
+{% endif %}
+
+traefik.tcp.services.{{ syncthing_identifier }}.loadbalancer.server.port={{ syncthing_container_sync_tcp_port }}
+{% endif %}
+
+{% if syncthing_container_labels_traefik_udp_enabled %}
+
+traefik.udp.routers.{{ syncthing_identifier }}.service={{ syncthing_identifier }}
+traefik.udp.routers.{{ syncthing_identifier }}.entrypoints={{ syncthing_container_labels_traefik_udp_entrypoints }}
+
+traefik.udp.services.{{ syncthing_identifier }}.loadbalancer.server.port={{ syncthing_container_sync_udp_port }}
 {% endif %}
 
 {% for arg in syncthing_container_labels_additional_labels %}
