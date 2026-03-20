@@ -292,16 +292,27 @@ syncthing_basicauth_enabled: true
 # A list of credential entries
 #
 # Example:
-# syncthing_credentials:
+# syncthing_basicauth_credentials:
 #   - username: someone
 #     password: secret-password
 #   - username: another
 #     password: more-secret-password
+#
+# This convenience method is discouraged. It requires the `passlib` Python
+# library on the Ansible controller, may be affected by passlib/bcrypt
+# compatibility issues (https://foss.heptapod.net/python-libs/passlib/-/issues/196),
+# and generates non-deterministic hashes which can lead to unnecessary changes.
+# Prefer defining `syncthing_basicauth_htpasswds` instead.
 syncthing_basicauth_credentials: []
 
 # A list of `htpasswd -nb user password` entries
-# Also see `syncthing_basicauth_credentials` for a more convenient way to create credentials.
-# Ansible will run `htpasswd` on the entries in `syncthing_basicauth_credentials` and append them to this list.
+# This is the preferred way to configure HTTP Basic authentication, because it
+# avoids the `passlib` dependency and keeps the resulting configuration stable
+# across playbook runs.
+#
+# Also see `syncthing_basicauth_credentials` for a legacy convenience method.
+# Ansible will convert the entries in `syncthing_basicauth_credentials` and append
+# them to this list.
 syncthing_basicauth_htpasswds: []
 
 # Temporary file path on the host that runs Ansible.
