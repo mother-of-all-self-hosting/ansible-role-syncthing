@@ -1,5 +1,5 @@
 # SPDX-FileCopyrightText: 2024 Slavi Pantaleev
-# SPDX-FileCopyrightText: 2025 Suguru Hirahara
+# SPDX-FileCopyrightText: 2025, 2026 Suguru Hirahara
 #
 # SPDX-License-Identifier: AGPL-3.0-or-later
 
@@ -24,6 +24,45 @@
         path: "{{ devture_systemd_docker_base_systemd_path }}/{{ syncthing_identifier }}.service"
         state: absent
 
+    - name: Ensure Syncthing support files do not exist
+      ansible.builtin.file:
+        path: "{{ syncthing_base_path }}/{{ item }}"
+        state: absent
+      with_items:
+        - env
+        - labels
+
+    - name: Ensure Syncthing image source files path does not exist
+      ansible.builtin.file:
+        path: "{{ syncthing_container_image_self_build_src_files_path }}"
+        state: absent
+
+    - name: Ensure Syncthing local config data path does not exist if empty
+      ansible.builtin.command:
+        cmd: "rmdir {{ syncthing_config_path }}"
+      register: syncthing_config_path_deletion_result
+      changed_when: syncthing_config_path_deletion_result.rc == 0
+      failed_when: false
+
+    - name: Ensure Syncthing local data path does not exist if empty
+      ansible.builtin.command:
+        cmd: "rmdir {{ syncthing_data_path }}"
+      register: syncthing_data_path_deletion_result
+      changed_when: syncthing_data_path_deletion_result.rc == 0
+      failed_when: false
+
+    - name: Ensure Syncthing local tmp path does not exist
+      ansible.builtin.file:
+        path: "{{ syncthing_tmp_path }}"
+        state: absent
+
+    - name: Ensure Syncthing base path does not exist if empty
+      ansible.builtin.command:
+        cmd: "rmdir {{ syncthing_base_path }}"
+      register: syncthing_base_path_deletion_result
+      changed_when: syncthing_base_path_deletion_result.rc == 0
+      failed_when: false
+
     - name: Ensure Syncthing container network does not exist
       when: syncthing_container_network_deletion_enabled
       block:
@@ -43,7 +82,38 @@
           register: syncthing_network_deletion_result
           changed_when: syncthing_container_network in syncthing_network_deletion_result.stdout
 
-    - name: Ensure Syncthing path does not exist
-      ansible.builtin.file:
-        path: "{{ syncthing_base_path }}"
-        state: absent
+- name: Check existence of Syncthing local config data path
+  ansible.builtin.stat:
+    path: "{{ syncthing_config_path }}"
+  register: syncthing_config_path_stat
+
+# We just want to notify the user. Deleting config is too destructive.
+- name: Inject the message about the remaining Syncthing local config config path
+  when: syncthing_config_path_stat.stat.exists | bool
+  ansible.builtin.set_fact:
+    devture_playbook_runtime_messages_list: |
+      {{
+        devture_playbook_runtime_messages_list | default([])
+        +
+        [
+          "Note: As the local Syncthing instance has been removed, local config data remains in `" + syncthing_config_path + "`. Feel free to delete it."
+        ]
+      }}
+
+- name: Check existence of Syncthing local data path
+  ansible.builtin.stat:
+    path: "{{ syncthing_data_path }}"
+  register: syncthing_data_path_stat
+
+# We just want to notify the user. Deleting data is too destructive.
+- name: Inject the message about the remaining Syncthing local data path
+  when: syncthing_data_path_stat.stat.exists | bool
+  ansible.builtin.set_fact:
+    devture_playbook_runtime_messages_list: |
+      {{
+        devture_playbook_runtime_messages_list | default([])
+        +
+        [
+          "Note: As the local Syncthing instance has been removed, local data remains in `" + syncthing_data_path + "`. Feel free to delete it."
+        ]
+      }}
