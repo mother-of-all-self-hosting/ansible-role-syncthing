@@ -37,7 +37,6 @@ syncthing_container_image_tag: "{{ syncthing_version }}"
 syncthing_container_image_registry_prefix: "{{ syncthing_container_image_registry_prefix_upstream }}"
 syncthing_container_image_registry_prefix_upstream: "{{ syncthing_container_image_registry_prefix_upstream_default }}"
 syncthing_container_image_registry_prefix_upstream_default: ghcr.io/
-syncthing_container_image_force_pull: "{{ syncthing_container_image.endswith(':latest') }}"
 
 syncthing_container_image_self_build: false
 syncthing_container_image_self_build_name: "syncthing/syncthing:{{ syncthing_container_image_self_build_repo_version }}"

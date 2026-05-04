@@ -13,6 +13,7 @@
     - { "old": "syncthing_container_tmp_on_tmpfs_enabled", "new": "syncthing_container_tmpfs_tmp_enabled" }
     - { "old": "syncthing_container_tmp_on_tmpfs_size_mb", "new": "syncthing_container_tmpfs_tmp_size" }
     - { "old": "syncthing_http_header_content_permission_policy", "new": "syncthing_http_header_permissions_policy" }
+    - { "old": "syncthing_container_image_force_pull", "new": "<removed> (the new community.docker.docker_image_pull module handles this natively)" }
 
 - name: Fail if required Syncthing settings not defined
   ansible.builtin.fail:
