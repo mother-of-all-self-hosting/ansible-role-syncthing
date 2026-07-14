@@ -39,6 +39,8 @@ To set up the environment for using Molecule, run the command below on the termi
 python3 -m venv ./molecule/venv
 source ./molecule/venv/bin/activate
 pip3 install -r ./molecule/requirements.txt
+ansible-galaxy role install -r molecule/default/requirements.yml
+ansible-galaxy collection install -r molecule/default/requirements.yml
 ```
 
 ## Scenarios
