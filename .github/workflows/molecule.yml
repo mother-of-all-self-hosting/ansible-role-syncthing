@@ -49,14 +49,6 @@ jobs:
           path: ~/.ansible/collections
           key: ansible-collections-${{ hashFiles('syncthing/molecule/default/requirements.yml') }}
 
-      - name: Install Ansible roles
-        working-directory: syncthing
-        run: ansible-galaxy role install -r molecule/default/requirements.yml
-
-      - name: Install Ansible collections
-        working-directory: syncthing
-        run: ansible-galaxy collection install -r molecule/default/requirements.yml
-
       - name: Run Molecule
         working-directory: syncthing
         run: molecule test --scenario-name ${{ matrix.scenario }}
