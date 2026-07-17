@@ -33,7 +33,7 @@ provisioner:
         # Variables for Syncthing
         syncthing_uid: 1000
         syncthing_gid: 1000
-        syncthing_hostname: syncthing
+        syncthing_hostname: localhost
         syncthing_container_labels_traefik_enabled: false
         syncthing_container_http_host_bind_port: 8384
         syncthing_basicauth_enabled: false
