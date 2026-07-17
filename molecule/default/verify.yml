@@ -23,6 +23,12 @@
         fail_msg: "syncthing.service not active ({{ syncthing_service.status.ActiveState }})"
         success_msg: "syncthing.service is active"
 
+    - name: Retrieve Syncthing service log for debugging
+      when: syncthing_debug_service_enabled | bool
+      ansible.builtin.command:
+        cmd: journalctl -xeu syncthing.service
+      changed_when: false
+
     - name: Wait for Syncthing HTTP endpoint to respond (up to 10m)
       ansible.builtin.uri:
         url: "http://localhost:8384/"

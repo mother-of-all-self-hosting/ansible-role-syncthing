@@ -27,6 +27,10 @@ provisioner:
   inventory:
     group_vars:
       all:
+        # Helper variables
+        syncthing_debug_service_enabled: false
+
+        # Variables for Syncthing
         syncthing_uid: 1000
         syncthing_gid: 1000
         syncthing_hostname: syncthing
