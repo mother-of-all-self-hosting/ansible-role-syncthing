@@ -1,0 +1,53 @@
+# SPDX-FileCopyrightText: 2026 Suguru Hirahara
+# SPDX-FileCopyrightText: 2026 spatterlight
+#
+# SPDX-License-Identifier: AGPL-3.0-or-later
+
+---
+- name: Verify Syncthing systemd service
+  hosts: all
+  become: true
+  gather_facts: false
+  tasks:
+    - name: Wait for Syncthing service to become active (up to 180s)
+      ansible.builtin.systemd:
+        name: syncthing.service
+      register: syncthing_service
+      until: syncthing_service.status.ActiveState == 'active'
+      retries: 36
+      delay: 5
+
+    - name: Assert Syncthing service is active
+      ansible.builtin.assert:
+        that: syncthing_service.status.ActiveState == 'active'
+        fail_msg: "syncthing.service not active ({{ syncthing_service.status.ActiveState }})"
+        success_msg: "syncthing.service is active"
+
+    - name: Retrieve Syncthing service log for debugging
+      when: syncthing_debug_service_enabled | bool
+      ansible.builtin.command:
+        cmd: journalctl -xeu syncthing.service
+      changed_when: false
+
+    - name: Wait for Syncthing HTTP endpoint to respond (up to 10m)
+      ansible.builtin.uri:
+        url: "http://localhost:8384/"
+        method: GET
+        status_code: [200, 302]
+        follow_redirects: none
+      register: syncthing_endpoint
+      until: syncthing_endpoint.status in [200, 302]
+      retries: 120
+      delay: 5
+
+    - name: Assert Syncthing HTTP endpoint responds
+      ansible.builtin.assert:
+        that: syncthing_endpoint.status in [200, 302]
+        fail_msg: "Syncthing did not respond as expected ({{ syncthing_endpoint.status | default('no response') }})"
+        success_msg: "Syncthing responded with {{ syncthing_endpoint.status }}"
+
+    - name: Show Syncthing systemd service status summary
+      ansible.builtin.debug:
+        msg:
+          - "Syncthing systemd: {{ syncthing_service.status.ActiveState }}"
+          - "Syncthing HTTP: {{ syncthing_endpoint.status }}"
