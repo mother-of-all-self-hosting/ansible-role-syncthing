@@ -1,14 +1,42 @@
 # SPDX-FileCopyrightText: 2026 Suguru Hirahara
 # SPDX-FileCopyrightText: 2026 spatterlight
+# SPDX-FileCopyrightText: 2026 Slavi Pantaleev
 #
 # SPDX-License-Identifier: AGPL-3.0-or-later
 
 ---
-- name: Verify Syncthing systemd service
+- name: Verify Syncthing
   hosts: all
   become: true
   gather_facts: false
+
+  vars:
+    syncthing_verify_base_url: "http://localhost:{{ syncthing_container_http_host_bind_port }}"
+
+    # The container image points Syncthing's home directory at
+    # `/var/syncthing/config`, which the role bind-mounts from
+    # `syncthing_config_path` - hence the doubled `config` below.
+    # Spelling the path out keeps the role defaults (whose values are Jinja
+    # expressions referring to one another) out of this play.
+    syncthing_verify_config_file_path: /syncthing/config/config/config.xml
+
+    # `syncthing_data_path`, bind-mounted into the container at `/data`.
+    syncthing_verify_data_path: /syncthing/data
+
+    # A folder created through the REST API below, to prove that Syncthing can
+    # actually manage a directory on the mounted data volume.
+    syncthing_verify_folder_id: molecule
+
   tasks:
+    # The role is not included in this playbook, so its defaults are not in
+    # scope. Reading defaults/main.yml directly ties the version assertion
+    # below to the value that Renovate bumps, with nothing to keep in sync
+    # here. include_vars reads from the controller.
+    - name: Load the Syncthing role defaults
+      ansible.builtin.include_vars:
+        file: "{{ lookup('env', 'MOLECULE_PROJECT_DIRECTORY') }}/defaults/main.yml"
+        name: syncthing_defaults
+
     - name: Wait for Syncthing service to become active (up to 180s)
       ansible.builtin.systemd:
         name: syncthing.service
@@ -29,25 +57,162 @@
         cmd: journalctl -xeu syncthing.service
       changed_when: false
 
-    - name: Wait for Syncthing HTTP endpoint to respond (up to 10m)
+    # `/rest/noauth/health` is the only REST endpoint Syncthing serves without
+    # authentication. It answers only once the daemon has finished starting up
+    # (configuration loaded, database opened, GUI listener bound), so it is a
+    # readiness probe rather than a "the process exists" check.
+    - name: Wait for the Syncthing health endpoint to report OK (up to 300s)
       ansible.builtin.uri:
-        url: "http://localhost:8384/"
+        url: "{{ syncthing_verify_base_url }}/rest/noauth/health"
         method: GET
-        status_code: [200, 302]
-        follow_redirects: none
-      register: syncthing_endpoint
-      until: syncthing_endpoint.status in [200, 302]
-      retries: 120
+        status_code: [200]
+        return_content: true
+      register: syncthing_health
+      until: syncthing_health.status == 200
+      retries: 60
       delay: 5
 
-    - name: Assert Syncthing HTTP endpoint responds
+    - name: Assert Syncthing reports itself as healthy
       ansible.builtin.assert:
-        that: syncthing_endpoint.status in [200, 302]
-        fail_msg: "Syncthing did not respond as expected ({{ syncthing_endpoint.status | default('no response') }})"
-        success_msg: "Syncthing responded with {{ syncthing_endpoint.status }}"
+        that: syncthing_health.json.status == 'OK'
+        fail_msg: "Unexpected /rest/noauth/health payload: {{ syncthing_health.json | default('no payload') }}"
+        success_msg: "Syncthing reports itself as healthy"
 
-    - name: Show Syncthing systemd service status summary
+    # Syncthing generates its configuration on first start, inside the
+    # directory the role bind-mounts. Finding an API key in it there proves
+    # that the mount is writable by the container user, and gives the rest of
+    # this play access to the authenticated part of the REST API.
+    - name: Read the Syncthing configuration generated on the config volume
+      ansible.builtin.slurp:
+        src: "{{ syncthing_verify_config_file_path }}"
+      register: syncthing_config_file
+
+    - name: Extract the Syncthing API key from the generated configuration
+      ansible.builtin.set_fact:
+        syncthing_verify_api_key: >-
+          {{ syncthing_config_file.content | b64decode | regex_search('<apikey>([^<]+)</apikey>', '\1') | first }}
+
+    - name: Assert an API key was generated
+      ansible.builtin.assert:
+        that: syncthing_verify_api_key | length > 0
+        fail_msg: "No API key found in {{ syncthing_verify_config_file_path }}"
+        success_msg: "Syncthing generated its configuration on the mounted volume"
+
+    # The image was built from the upstream tag that `syncthing_version`
+    # points at, so this is what proves that the self-build actually produced
+    # the requested version, rather than some other commit.
+    - name: Query the version reported by the running Syncthing
+      ansible.builtin.uri:
+        url: "{{ syncthing_verify_base_url }}/rest/system/version"
+        method: GET
+        headers:
+          X-API-Key: "{{ syncthing_verify_api_key }}"
+        status_code: [200]
+        return_content: true
+      register: syncthing_api_version
+
+    # Syncthing reports its version with a leading `v` (`v2.1.3`), while the
+    # role variable does not carry one. A prefix match tolerates any build
+    # metadata that a self-built binary may append.
+    - name: Assert the running Syncthing is the version this role installs
+      ansible.builtin.assert:
+        that:
+          - syncthing_api_version.json.version | regex_replace('^v', '') is match(syncthing_defaults.syncthing_version | regex_escape)
+          - syncthing_api_version.json.container | bool
+        fail_msg: >-
+          Syncthing reports version {{ syncthing_api_version.json.version | default('none') }},
+          but the role asks for {{ syncthing_defaults.syncthing_version }}
+        success_msg: "Syncthing reports version {{ syncthing_api_version.json.version }}"
+
+    # The device identity is derived from the TLS key pair Syncthing generates
+    # on the mounted volume, so a well-formed device ID means that the key
+    # material made it into the running daemon.
+    - name: Query the status of the running Syncthing
+      ansible.builtin.uri:
+        url: "{{ syncthing_verify_base_url }}/rest/system/status"
+        method: GET
+        headers:
+          X-API-Key: "{{ syncthing_verify_api_key }}"
+        status_code: [200]
+        return_content: true
+      register: syncthing_api_status
+
+    - name: Assert Syncthing has a device identity
+      ansible.builtin.assert:
+        that: syncthing_api_status.json.myID is match('[A-Z0-9]{7}(-[A-Z0-9]{7}){7}$')
+        fail_msg: "Unexpected device ID: {{ syncthing_api_status.json.myID | default('none') }}"
+        success_msg: "Syncthing runs as device {{ syncthing_api_status.json.myID }}"
+
+    # Creating a folder is the one thing a file-synchronization daemon exists
+    # to do. It writes through the configuration API and makes Syncthing create
+    # a directory on the mounted data volume, which is checked on the host
+    # below - so this covers the whole path, not just the HTTP listener.
+    - name: Create a folder through the Syncthing API
+      ansible.builtin.uri:
+        url: "{{ syncthing_verify_base_url }}/rest/config/folders"
+        method: POST
+        headers:
+          X-API-Key: "{{ syncthing_verify_api_key }}"
+        body_format: json
+        body:
+          id: "{{ syncthing_verify_folder_id }}"
+          label: Molecule
+          path: "/data/{{ syncthing_verify_folder_id }}"
+          type: sendreceive
+          devices:
+            - deviceID: "{{ syncthing_api_status.json.myID }}"
+        status_code: [200]
+      changed_when: true
+
+    - name: Read the folders back through the Syncthing API
+      ansible.builtin.uri:
+        url: "{{ syncthing_verify_base_url }}/rest/config/folders"
+        method: GET
+        headers:
+          X-API-Key: "{{ syncthing_verify_api_key }}"
+        status_code: [200]
+        return_content: true
+      register: syncthing_api_folders
+      until: syncthing_verify_folder_id in (syncthing_api_folders.json | map(attribute='id') | list)
+      retries: 12
+      delay: 5
+
+    - name: Wait for Syncthing to create the folder on the data volume
+      ansible.builtin.stat:
+        path: "{{ syncthing_verify_data_path }}/{{ syncthing_verify_folder_id }}"
+      register: syncthing_folder_directory
+      until: syncthing_folder_directory.stat.isdir | default(false)
+      retries: 12
+      delay: 5
+
+    - name: Assert the folder was created on the data volume
+      ansible.builtin.assert:
+        that: syncthing_folder_directory.stat.isdir | default(false)
+        fail_msg: "Syncthing did not create {{ syncthing_verify_data_path }}/{{ syncthing_verify_folder_id }}"
+        success_msg: "Syncthing manages a folder on the mounted data volume"
+
+    # The web interface is served by the same process, but out of its own asset
+    # bundle, so a rendered page covers more than the REST API alone does.
+    - name: Retrieve the Syncthing web interface
+      ansible.builtin.uri:
+        url: "{{ syncthing_verify_base_url }}/"
+        method: GET
+        status_code: [200]
+        return_content: true
+      register: syncthing_endpoint
+
+    - name: Assert the Syncthing web interface is served
+      ansible.builtin.assert:
+        that: "'Syncthing' in syncthing_endpoint.content"
+        fail_msg: "The Syncthing web interface did not render as expected"
+        success_msg: "The Syncthing web interface is served"
+
+    - name: Show Syncthing verification summary
       ansible.builtin.debug:
         msg:
           - "Syncthing systemd: {{ syncthing_service.status.ActiveState }}"
-          - "Syncthing HTTP: {{ syncthing_endpoint.status }}"
+          - "Health: {{ syncthing_health.json.status }}"
+          - "Version: {{ syncthing_api_version.json.version }}"
+          - "Device ID: {{ syncthing_api_status.json.myID }}"
+          - "Folders: {{ syncthing_api_folders.json | map(attribute='id') | list }}"
+          - "Web interface: {{ syncthing_endpoint.status }}"

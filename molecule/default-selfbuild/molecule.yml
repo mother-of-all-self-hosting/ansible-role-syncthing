@@ -12,7 +12,7 @@ dependency:
 driver:
   name: docker
 platforms:
-  - name: syncthing-${MOLECULE_DISTRO:-ubuntu2604}-default
+  - name: syncthing-${MOLECULE_DISTRO:-ubuntu2604}-default-selfbuild
     image: "geerlingguy/docker-${MOLECULE_DISTRO:-ubuntu2604}-ansible:latest"
     command: ${MOLECULE_DOCKER_COMMAND:-""}
     volumes:
