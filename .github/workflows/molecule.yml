@@ -159,8 +159,6 @@ jobs:
           path: ~/.ansible/collections
           key: ansible-collections-${{ hashFiles('syncthing/molecule/default-selfbuild/requirements.yml') }}
 
-      # Upstream's Dockerfile builds cleanly, so a self-build failure here is a
-      # real failure and is left blocking.
       - name: Run Molecule
         working-directory: syncthing
         run: molecule test --scenario-name default-selfbuild
