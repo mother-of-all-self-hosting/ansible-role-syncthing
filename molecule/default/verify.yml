@@ -204,12 +204,12 @@
         fail_msg: "The Syncthing web interface did not render as expected"
         success_msg: "The Syncthing web interface is served"
 
-    - name: Show Syncthing verification summary
+    - name: Show the Syncthing verification summary
       ansible.builtin.debug:
         msg:
           - "Syncthing systemd: {{ syncthing_service.status.ActiveState }}"
-          - "Health: {{ syncthing_health.json.status }}"
-          - "Version: {{ syncthing_api_version.json.version }}"
-          - "Device ID: {{ syncthing_api_status.json.myID }}"
-          - "Folders: {{ syncthing_api_folders.json | map(attribute='id') | list }}"
-          - "Web interface: {{ syncthing_endpoint.status }}"
+          - "Syncthing health: {{ syncthing_health.json.status }}"
+          - "Syncthing version: {{ syncthing_api_version.json.version }}"
+          - "Syncthing device ID: {{ syncthing_api_status.json.myID }}"
+          - "Syncthing folders: {{ syncthing_api_folders.json | map(attribute='id') | list }}"
+          - "Syncthing web interface: {{ syncthing_endpoint.status }}"
