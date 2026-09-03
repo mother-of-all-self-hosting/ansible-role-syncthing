@@ -98,10 +98,7 @@
         fail_msg: "No API key found in {{ syncthing_verify_config_file_path }}"
         success_msg: "Syncthing generated its configuration on the mounted volume"
 
-    # Tying the running version to `syncthing_version` is what makes this
-    # scenario a real test of the version that Renovate bumps: a bump that
-    # produces an unusable image cannot pass here.
-    - name: Query the version reported by the running Syncthing
+    - name: Query the version reported by the running Syncthing in order to make sure that the expected version is running
       ansible.builtin.uri:
         url: "{{ syncthing_verify_base_url }}/rest/system/version"
         method: GET
