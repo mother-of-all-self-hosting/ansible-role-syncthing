@@ -7,9 +7,8 @@
 ---
 # The role is not included in this playbook, so its defaults are not in
 # scope. Reading defaults/main.yml directly ties the version assertion
-# below to the value that Renovate bumps, with nothing to keep in sync
-# here. include_vars reads from the controller.
-- name: Load the Syncthing role defaults
+# below.
+- name: Load the role defaults
   ansible.builtin.include_vars:
     file: "{{ lookup('env', 'MOLECULE_PROJECT_DIRECTORY') }}/defaults/main.yml"
     name: syncthing_defaults
