@@ -92,10 +92,8 @@
     that:
       - syncthing_api_version.json.version | regex_replace('^v', '') is match(syncthing_defaults.syncthing_version | regex_escape)
       - syncthing_api_version.json.container | bool
-    fail_msg: >-
-      Syncthing reports version {{ syncthing_api_version.json.version | default('none') }},
-      but the role asks for {{ syncthing_defaults.syncthing_version }}
-    success_msg: "Syncthing reports version {{ syncthing_api_version.json.version }}"
+    fail_msg: "Syncthing reports {{ syncthing_api_version.json.version | default('none') }}, expected {{ syncthing_defaults.syncthing_version }}"
+    success_msg: "Syncthing reports {{ syncthing_api_version.json.version }}"
 
 # The device identity is derived from the TLS key pair Syncthing generates
 # on the mounted volume, so a well-formed device ID means that the key
