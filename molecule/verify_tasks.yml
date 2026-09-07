@@ -182,8 +182,8 @@
   ansible.builtin.debug:
     msg:
       - "Syncthing systemd: {{ syncthing_service.status.ActiveState }}"
-      - "Syncthing health: {{ syncthing_health.json.status }}"
       - "Syncthing version: {{ syncthing_api_version.json.version }}"
+      - "Syncthing health: {{ syncthing_health.json.status }}"
       - "Syncthing device ID: {{ syncthing_api_status.json.myID }}"
       - "Syncthing folders: {{ syncthing_api_folders.json | map(attribute='id') | list }}"
       - "Syncthing web interface: {{ syncthing_endpoint.status }}"
