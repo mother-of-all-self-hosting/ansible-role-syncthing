@@ -36,7 +36,7 @@
 - name: Retrieve the Syncthing systemd service log for debugging
   when: syncthing_debug_service_enabled | bool
   ansible.builtin.command:
-    cmd: journalctl -xeu syncthing.service
+    cmd: journalctl --no-pager --output=cat --unit=syncthing.service
   changed_when: false
 
 # `/rest/noauth/health` is the only REST endpoint Syncthing serves without
