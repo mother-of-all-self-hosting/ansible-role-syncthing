@@ -88,17 +88,17 @@
       X-API-Key: "{{ syncthing_verify_api_key }}"
     status_code: [200]
     return_content: true
-  register: syncthing_api_version
+  register: syncthing_version_reported
 
 # Syncthing reports its version with a leading `v` (`v2.1.3`), while the
 # role variable does not carry one.
 - name: Assert the running Syncthing is the version this role installs
   ansible.builtin.assert:
     that:
-      - (syncthing_api_version.json.version | string | regex_replace('v', '')) == syncthing_defaults.syncthing_version
-      - syncthing_api_version.json.container | bool
-    fail_msg: "Syncthing reports {{ syncthing_api_version.json.version | default('none') }}, expected {{ syncthing_defaults.syncthing_version }}"
-    success_msg: "Syncthing reports {{ syncthing_api_version.json.version }}"
+      - (syncthing_version_reported.json.version | string | regex_replace('v', '')) == syncthing_defaults.syncthing_version
+      - syncthing_version_reported.json.container | bool
+    fail_msg: "Syncthing reports {{ syncthing_version_reported.json.version | default('none') }}, expected {{ syncthing_defaults.syncthing_version }}"
+    success_msg: "Syncthing reports {{ syncthing_version_reported.json.version }}"
 
 # The device identity is derived from the TLS key pair Syncthing generates
 # on the mounted volume, so a well-formed device ID means that the key
@@ -187,7 +187,7 @@
   ansible.builtin.debug:
     msg:
       - "Syncthing systemd: {{ syncthing_service.status.ActiveState }}"
-      - "Syncthing version: {{ syncthing_api_version.json.version }}"
+      - "Syncthing version: {{ syncthing_version_reported.json.version }}"
       - "Syncthing health: {{ syncthing_health.json.status }}"
       - "Syncthing device ID: {{ syncthing_api_status.json.myID }}"
       - "Syncthing folders: {{ syncthing_api_folders.json | map(attribute='id') | list }}"
