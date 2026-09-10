@@ -28,6 +28,24 @@
     syncthing_verify_folder_id: molecule
 
   tasks:
-    - name: Run the checks shared by all Syncthing scenarios
-      ansible.builtin.include_tasks:
-        file: "{{ lookup('ansible.builtin.env', 'MOLECULE_PROJECT_DIRECTORY') }}/molecule/verify_tasks.yml"
+    - name: Verify that Syncthing works
+      block:
+        - name: Run the checks shared by all Syncthing scenarios
+          ansible.builtin.include_tasks:
+            file: "{{ lookup('ansible.builtin.env', 'MOLECULE_PROJECT_DIRECTORY') }}/molecule/verify_tasks.yml"
+
+      rescue:
+        # Whatever went wrong, the reason is almost always in the systemd service log.
+        - name: Retrieve the Syncthing systemd service log
+          ansible.builtin.command:
+            cmd: journalctl --no-pager --output=cat --unit=syncthing.service
+          register: syncthing_service_log
+          changed_when: false
+
+        - name: Show the Syncthing systemd service log
+          ansible.builtin.debug:
+            var: syncthing_service_log.stdout_lines
+
+        - name: Fail because verification did not pass
+          ansible.builtin.fail:
+            msg: "Syncthing verification failed. The systemd service log is printed above."
