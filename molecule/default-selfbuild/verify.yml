@@ -27,6 +27,9 @@
     # actually manage a directory on the mounted data volume.
     syncthing_verify_folder_id: molecule
 
+    syncthing_verify_units:
+      - syncthing.service
+
   tasks:
     - name: Verify that Syncthing works
       block:
