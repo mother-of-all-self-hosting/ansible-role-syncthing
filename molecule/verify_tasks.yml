@@ -47,7 +47,7 @@
 # authentication. It answers only once the daemon has finished starting up
 # (configuration loaded, database opened, GUI listener bound), so it is a
 # readiness probe rather than a "the process exists" check.
-- name: Wait for the Syncthing health endpoint to report OK (up to 300s)
+- name: Wait for Syncthing to report itself healthy (up to 180s)
   ansible.builtin.uri:
     url: "{{ syncthing_verify_base_url }}/rest/noauth/health"
     method: GET
@@ -55,14 +55,17 @@
     return_content: true
   register: syncthing_health
   until: syncthing_health.status == 200
-  retries: 60
+  retries: 36
   delay: 5
+  # So that giving up is reported by the assertion below rather than as a
+  # wall of systemd unit properties.
+  failed_when: false
 
-- name: Assert Syncthing reports itself as healthy
+- name: Assert Syncthing reports itself healthy
   ansible.builtin.assert:
     that: syncthing_health.json.status == 'OK'
-    fail_msg: "Unexpected /rest/noauth/health payload: {{ syncthing_health.json | default('no payload') }}"
-    success_msg: "Syncthing reports itself as healthy"
+    fail_msg: "Syncthing did not report itself healthy: {{ syncthing_health.json | default('no payload') }}"
+    success_msg: "Syncthing reports itself healthy"
 
 # Syncthing generates its configuration on first start, inside the
 # directory the role bind-mounts. Finding an API key in it there proves
