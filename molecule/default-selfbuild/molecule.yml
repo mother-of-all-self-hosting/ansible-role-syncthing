@@ -30,6 +30,7 @@ provisioner:
       all:
         # Helper variables
         syncthing_debug_service_enabled: false
+        syncthing_restarts_check_enabled: true
 
         # Variables for Syncthing
         syncthing_uid: 1000
