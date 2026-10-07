@@ -113,7 +113,7 @@ syncthing_container_labels_traefik_priority: 0
 syncthing_container_labels_traefik_entrypoints: web-secure
 syncthing_container_labels_traefik_tls: "{{ syncthing_container_labels_traefik_entrypoints != 'web' }}"
 syncthing_container_labels_traefik_tls_certResolver: default  # noqa var-naming
-bitmagnet_container_labels_traefik_middleware_basic_auth_enabled: true
+syncthing_container_labels_traefik_middleware_basic_auth_enabled: true
 # See: https://doc.traefik.io/traefik/reference/routing-configuration/http/middlewares/basicauth/
 syncthing_container_labels_traefik_middleware_basic_auth_users: []  # Mind this is a list due to old `syncthing_basicauth_htpasswds` variable (unlike other roles)
 
@@ -294,8 +294,6 @@ syncthing_container_cleanup_command: |
 
 # Specify the timezone
 syncthing_environment_variables_tz: UTC
-
-syncthing_container_labels_traefik_middleware_basic_auth_enabled: true
 
 # A list of credential entries
 #
