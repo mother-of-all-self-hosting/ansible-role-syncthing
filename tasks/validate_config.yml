@@ -36,12 +36,17 @@
     - name: Fail if Traefik settings required for Syncthing are not defined
       ansible.builtin.fail:
         msg: >-
-          You need to define a required configuration setting (`{{ item.name }}`).
-      when: "item.when | bool and lookup('vars', item.name, default='') | string | length == 0"
+          You need to define a required configuration setting (`{{ item }}`).
+      when: "lookup('vars', item, default='') | string | length == 0"
       with_items:
-        - { "name": "syncthing_container_labels_traefik_hostname", when: true }
-        - { "name": "syncthing_container_labels_traefik_path_prefix", when: true }
-        - { "name": "syncthing_container_labels_traefik_middleware_basic_auth_users", when: "syncthing_container_labels_traefik_middleware_basic_auth_enabled and (syncthing_basicauth_credentials | length + syncthing_container_labels_traefik_middleware_basic_auth_users | length == 0)" }
+        - syncthing_container_labels_traefik_hostname
+        - syncthing_container_labels_traefik_path_prefix
+
+    - name: Fail if Traefik settings required for Syncthing are not defined
+      ansible.builtin.fail:
+        msg: >-
+          You need to define at least one set of credentials in `syncthing_basicauth_credentials` or `syncthing_container_labels_traefik_middleware_basic_auth_users`.
+      when: "syncthing_container_labels_traefik_middleware_basic_auth_enabled and (syncthing_basicauth_credentials | length + syncthing_container_labels_traefik_middleware_basic_auth_users | length == 0)" # Due to old `syncthing_basicauth_credentials` variable
 
     # We ensure it doesn't end with a slash, because we handle both (slash and no-slash).
     # Knowing that `syncthing_container_labels_traefik_path_prefix` does not end with a slash
