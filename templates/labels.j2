@@ -14,15 +14,15 @@ traefik.docker.network={{ syncthing_container_labels_traefik_docker_network }}
 
 {% set middlewares = [] %}
 
+{% if syncthing_container_labels_traefik_middleware_basic_auth_enabled %}
+{% set middlewares = middlewares + [syncthing_identifier + '-basic-auth'] %}
+traefik.http.middlewares.{{ syncthing_identifier }}-basic-auth.basicauth.users={{ syncthing_container_labels_traefik_middleware_basic_auth_users | join(',') }}
+{% endif %}
+
 {% if syncthing_container_labels_traefik_path_prefix != '/' %}
 traefik.http.middlewares.{{ syncthing_identifier }}-slashless-redirect.redirectregex.regex=https?://([^/]+)({{ syncthing_container_labels_traefik_path_prefix | quote }})$
 traefik.http.middlewares.{{ syncthing_identifier }}-slashless-redirect.redirectregex.replacement=${2}/
 {% set middlewares = middlewares + [syncthing_identifier + '-slashless-redirect'] %}
-{% endif %}
-
-{% if syncthing_container_labels_traefik_middleware_basic_auth_enabled %}
-{% set middlewares = middlewares + [syncthing_identifier + '-basic-auth'] %}
-traefik.http.middlewares.{{ syncthing_identifier }}-basic-auth.basicauth.users={{ syncthing_container_labels_traefik_middleware_basic_auth_users | join(',') }}
 {% endif %}
 
 {% if syncthing_container_labels_traefik_path_prefix != '/' %}
