@@ -292,9 +292,6 @@ syncthing_container_cleanup_command: |
   echo "Failed to remove stale container {{ syncthing_identifier }} after {{ syncthing_container_cleanup_timeout_seconds }} attempts" >&2;
   exit 1
 
-# Specify the timezone
-syncthing_environment_variables_tz: UTC
-
 # A list of credential entries
 #
 # Example:
@@ -314,6 +311,9 @@ syncthing_basicauth_credentials: []
 # Temporary file path on the host that runs Ansible.
 # Used for converting the `syncthing_basicauth_credentials` entries to `syncthing_container_labels_traefik_middleware_basic_auth_users` entries.
 syncthing_basicauth_file_tmp: "/tmp/ansible_htpasswd"
+
+# Specify the timezone
+syncthing_environment_variables_tz: UTC
 
 # Additional environment variables.
 syncthing_environment_variables_additional_variables: ""
