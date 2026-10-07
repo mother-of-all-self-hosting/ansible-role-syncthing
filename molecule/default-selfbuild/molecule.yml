@@ -45,7 +45,7 @@ provisioner:
         syncthing_hostname: localhost
         syncthing_container_labels_traefik_enabled: false
         syncthing_container_http_host_bind_port: 8384
-        syncthing_basicauth_enabled: false
+        syncthing_container_labels_traefik_middleware_basic_auth_enabled: false
 
         # Test self-building
         syncthing_container_image_self_build: true

@@ -12,6 +12,8 @@
   with_items:
     - { "old": "syncthing_container_tmp_on_tmpfs_enabled", "new": "syncthing_container_tmpfs_tmp_enabled" }
     - { "old": "syncthing_container_tmp_on_tmpfs_size_mb", "new": "syncthing_container_tmpfs_tmp_size" }
+    - { "old": "syncthing_basicauth_enabled", "new": "syncthing_container_labels_traefik_middleware_basic_auth_enabled" }
+    - { "old": "syncthing_basicauth_htpasswds", "new": "syncthing_container_labels_traefik_middleware_basic_auth_users" }
     - { "old": "syncthing_http_header_content_permission_policy", "new": "syncthing_http_header_permissions_policy" }
     - { "old": "syncthing_container_image_force_pull", "new": "<removed> (the new community.docker.docker_image_pull module handles this natively)" }
 
@@ -28,24 +30,18 @@
     - syncthing_path_prefix
     - syncthing_container_network
 
-- name: Fail if required Syncthing HTTP Basic authentication enabled, but no credentials specified
-  ansible.builtin.fail:
-    msg: >-
-      When enabling HTTP Basic authentication for Syncthing (`syncthing_basicauth_enabled`), you need to provide at least one set of
-      credentials in `syncthing_basicauth_credentials` or `syncthing_basicauth_htpasswds`.
-  when: "syncthing_basicauth_enabled and (syncthing_basicauth_credentials | length + syncthing_basicauth_htpasswds | length == 0)"
-
 - name: Run if Traefik is enabled
   when: syncthing_container_labels_traefik_enabled | bool
   block:
     - name: Fail if Traefik settings required for Syncthing are not defined
       ansible.builtin.fail:
         msg: >-
-          You need to define a required configuration setting (`{{ item }}`).
-      when: "lookup('vars', item, default='') | string | length == 0"
+          You need to define a required configuration setting (`{{ item.name }}`).
+      when: "item.when | bool and lookup('vars', item.name, default='') | string | length == 0"
       with_items:
-        - syncthing_container_labels_traefik_hostname
-        - syncthing_container_labels_traefik_path_prefix
+        - { "name": "syncthing_container_labels_traefik_hostname", when: true }
+        - { "name": "syncthing_container_labels_traefik_path_prefix", when: true }
+        - { "name": "syncthing_container_labels_traefik_middleware_basic_auth_users", when: "syncthing_container_labels_traefik_middleware_basic_auth_enabled and (syncthing_basicauth_credentials | length + syncthing_container_labels_traefik_middleware_basic_auth_users | length == 0)" }
 
     # We ensure it doesn't end with a slash, because we handle both (slash and no-slash).
     # Knowing that `syncthing_container_labels_traefik_path_prefix` does not end with a slash
