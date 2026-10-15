@@ -106,6 +106,14 @@ Please note that changing `syncthing_container_sync_tcp_port` or `syncthing_cont
 3. Log in to the Syncthing Web UI (refer to [Usage](#usage))
 4. Go to **Settings** -> **Connections** and put something like this in the **Sync Protocol Listen Addresses** configuration (inspired by the [Listen Addresses documentation](https://docs.syncthing.net/v1.27.0/users/config#listen-addresses)): `tcp://0.0.0.0:TCP_PORT_HERE, quic://0.0.0.0:UDP_PORT_HERE, dynamic+https://relays.syncthing.net/endpoint` (adjust `TCP_PORT_HERE` and `UDP_PORT_HERE` with the port numbers you've chosen for `syncthing_container_sync_tcp_port` and `syncthing_container_sync_udp_port`)
 
+#### Routing sync traffic through Traefik (not recommended)
+
+The role can attach Traefik labels for the sync ports (`syncthing_container_labels_traefik_tcp_enabled` and `syncthing_container_labels_traefik_udp_enabled`), but we recommend leaving them disabled and letting the container publish the sync ports itself.
+
+When sync traffic goes through Traefik, Syncthing only sees Traefik's IP address instead of its peers' addresses, because Syncthing does not support the PROXY protocol. As a result, all peers appear to be on the local network. Traefik middlewares do not add much here either, because Syncthing devices authenticate each other with their own TLS certificates.
+
+If you enable the UDP router anyway, the Traefik entrypoint needs a UDP session timeout longer than Syncthing's QUIC keepalive interval (see `syncthing_container_labels_traefik_udp_entrypoint_timeout`). Otherwise, QUIC connections break and peers reconnect repeatedly.
+
 ### Adjusting data directory path (optional)
 
 By default, the data directory is created at `/syncthing/data` as defined below. If you'd like to put it elsewhere on the host, add the following configuration to your `vars.yml` file (adapt to your needs):
