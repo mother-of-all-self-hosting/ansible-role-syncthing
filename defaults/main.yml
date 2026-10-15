@@ -138,6 +138,12 @@ syncthing_container_labels_traefik_udp_enabled: false
 syncthing_container_labels_traefik_udp_docker_network: "{{ syncthing_container_network }}"
 syncthing_container_labels_traefik_udp_entrypoints: syncthing-udp
 
+# Controls how long Traefik keeps an idle UDP session alive on the entrypoint used for UDP sync connections.
+# This role does not define that entrypoint, so the playbook that defines it is expected to apply this value.
+# Traefik's default (3s) is shorter than Syncthing's QUIC keepalive interval (15s),
+# which breaks QUIC connections and makes peers reconnect repeatedly.
+syncthing_container_labels_traefik_udp_entrypoint_timeout: 60s
+
 # Controls which additional headers to attach to all HTTP requests.
 # To add your own custom request headers, use `syncthing_container_labels_traefik_additional_request_headers_custom`
 syncthing_container_labels_traefik_additional_request_headers: "{{ syncthing_container_labels_traefik_additional_request_headers_auto | combine(syncthing_container_labels_traefik_additional_request_headers_custom) }}"
