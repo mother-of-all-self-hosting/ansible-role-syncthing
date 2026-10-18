@@ -59,6 +59,52 @@ traefik.http.routers.{{ syncthing_identifier }}.tls.certResolver={{ syncthing_co
 {% endif %}
 
 traefik.http.services.{{ syncthing_identifier }}.loadbalancer.server.port={{ syncthing_container_http_port }}
+
+{% if syncthing_container_labels_traefik_metrics_enabled %}
+########################################################################
+#                                                                      #
+# Metrics                                                              #
+#                                                                      #
+########################################################################
+
+{% set middlewares = syncthing_container_labels_traefik_metrics_middlewares %}
+
+{% if syncthing_container_labels_traefik_metrics_middleware_basic_auth_enabled %}
+traefik.http.middlewares.{{ syncthing_identifier }}-metrics-basic-auth.basicauth.users={{ syncthing_container_labels_traefik_metrics_middleware_basic_auth_users }}
+{% set middlewares = middlewares + [syncthing_identifier + '-metrics-basic-auth'] %}
+{% endif %}
+
+traefik.http.middlewares.{{ syncthing_identifier }}-metrics-replace-path.replacepath.path=/metrics
+{% set middlewares = middlewares + [syncthing_identifier + '-metrics-replace-path'] %}
+
+traefik.http.routers.{{ syncthing_identifier }}-metrics.rule={{ syncthing_container_labels_traefik_metrics_rule }}
+
+{% if syncthing_container_labels_traefik_metrics_priority | int > 0 %}
+traefik.http.routers.{{ syncthing_identifier }}-metrics.priority={{ syncthing_container_labels_traefik_metrics_priority }}
+{% endif %}
+
+traefik.http.routers.{{ syncthing_identifier }}-metrics.service={{ syncthing_identifier }}-metrics
+
+{% if middlewares | length > 0 %}
+traefik.http.routers.{{ syncthing_identifier }}-metrics.middlewares={{ middlewares | join(',') }}
+{% endif %}
+
+traefik.http.routers.{{ syncthing_identifier }}-metrics.entrypoints={{ syncthing_container_labels_traefik_metrics_entrypoints }}
+
+traefik.http.routers.{{ syncthing_identifier }}-metrics.tls={{ syncthing_container_labels_traefik_metrics_tls | to_json }}
+{% if syncthing_container_labels_traefik_metrics_tls %}
+traefik.http.routers.{{ syncthing_identifier }}-metrics.tls.certResolver={{ syncthing_container_labels_traefik_metrics_tls_certResolver }}
+{% endif %}
+
+traefik.http.services.{{ syncthing_identifier }}-metrics.loadbalancer.server.port={{ syncthing_container_http_port }}
+
+########################################################################
+#                                                                      #
+# /Metrics                                                             #
+#                                                                      #
+########################################################################
+{% endif %}
+
 {% endif %}
 
 {% if syncthing_container_labels_traefik_tcp_enabled %}
