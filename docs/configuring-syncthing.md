@@ -173,6 +173,10 @@ As mentioned in [Configuration & Data](#configuration--data) above, consider to:
 
 Also, as mentioned in [Authentication](#configuring-http-basic-authentication), you'd wish to disable the "no GUI password set" security warnings, if either the HTTP Basic authentication on Traefik or another authentication service is used.
 
+### Using Android clients
+
+There are several Syncthing clients for Android such as [Syncthing-Fork](https://f-droid.org/packages/com.github.catfriend1.syncthingfork/). Note that [the official client](https://github.com/syncthing/syncthing-android) has been discontinued and retired.
+
 ## Troubleshooting
 
 ### Check the service's logs
